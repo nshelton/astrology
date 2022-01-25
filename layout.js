@@ -2,16 +2,12 @@
 
 planetSymbols = ["☉", "☽", "☿", "♀", "♂", "♃", "♄", "⛢", "♆", "♇"]
 planetNames = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto']
+zodiac =  ["Ari", "Tau", "Gem", "Cnc", "Leo", "Vir","Lib", "Sco","Sgr", "Cap", "Aqr","Psc"]
+symbols = ["♈︎", "♉︎",  "♊︎", "♋︎", "♌︎", "♍︎", "♎︎", "♏︎", "♐︎",  "♑︎", "♒︎", "♓︎"]
 
-zodiac = ["Vir","Ari","Cap","Cnc","Leo","Gem","Lib","Psc","Aqr","Sgr", "Sco", "Tau", "Dra"]
-symbols = ["♍︎", "♈︎", "♑︎", "♋︎",  "♌︎", "♊︎", "♎︎", "♓︎", "♒︎", "♐︎", "♏︎", "♉︎", ""]
-elements = ["🜃", " 🜂", "🜃", "🜄",  " 🜂", "🜁", "🜁", "🜄", "🜁", " 🜂", "🜄", "🜃", ""]
+// elements = ["🜃", " 🜂", "🜃", "🜄",  " 🜂", "🜁", "🜁", "🜄", "🜁", " 🜂", "🜄", "🜃"]
 
-
-
-
-
-function layoutPlanetLabels(positions)  {
+function layoutPlanetLabels(positions, distance, c)  {
 
     let newPositions = {}
 
@@ -19,7 +15,7 @@ function layoutPlanetLabels(positions)  {
     let angles = {}
     for (var i = 0; i < planetNames.length; i ++) {
         if ( radialProjection) {
-            angles[planetNames[i]] =  getAngle(positions[planetNames[i]], eclipticCenter)
+            angles[planetNames[i]] =  getAngle(positions[planetNames[i]], c)
         } else {
             angles[planetNames[i]] = positions[planetNames[i]][0]
         }
@@ -47,7 +43,7 @@ function layoutPlanetLabels(positions)  {
 
     for (var i = 0; i < planetNames.length; i ++) {
         if ( radialProjection) {
-            newPositions[planetNames[i]] = fromRadial(angles[planetNames[i]], 400, eclipticCenter)
+            newPositions[planetNames[i]] = fromRadial(angles[planetNames[i]], distance, c)
         } else {
             newPositions[planetNames[i]] = [angles[planetNames[i]], 800];
         }
@@ -56,13 +52,13 @@ function layoutPlanetLabels(positions)  {
     return newPositions
 }
 
-        function findConjunctions(positions, thresh)  {
+        function findConjunctions(positions, thresh, c)  {
             conj = []
 
             // move to fixed radius
             let angles = {}
             for (var i = 0; i < planetNames.length; i ++) {
-                angles[planetNames[i]] =  getAngle(positions[planetNames[i]], eclipticCenter)
+                angles[planetNames[i]] =  getAngle(positions[planetNames[i]], c)
                 if ( angles[planetNames[i]] < 0 )
                     angles[planetNames[i]] += Math.PI * 2
             }

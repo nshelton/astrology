@@ -183,10 +183,10 @@ function createPlot() {
                 var coord = json.features[i].geometry.coordinates
                 var mag = parseFloat(json.features[i].properties.mag);
     
-                if (mag > 4)
+                if (mag > 6)
                     continue;
      
-                r = 2 * Math.pow(4 - mag, 0.7); // replace 20 with dimmest magnitude in the data
+                r = 2 * Math.pow(6 - mag, 0.7); // replace 20 with dimmest magnitude in the data
                 coord = transformDegreesCelestialToEarth(coord)
                 rect = chart.circle(r).cx(coord[0]).cy(coord[1]).stroke('#f06').fill("none")
             }
