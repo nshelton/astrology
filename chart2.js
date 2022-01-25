@@ -14,8 +14,8 @@ rad2deg = 1/deg2rad;
 
 // var _Time = new Date('June 11, 1989 23:05:00')
 // _Time = new Date('June 21, 1959 23:05:00')
-// _Time = new Date('April 10, 1991 23:00:00 CST')
-_Time = new Date();
+_Time = new Date('April 10, 1991 23:05:00 GMT')
+// _Time = new Date();
 // _Time = new Date('September 19, 1990 07:47:00 PST')
 // _Time = new Date('October 22, 1986 17:10:00 PST')
 // _Time.setMonth( Math.round(Math.random() * 11) )
@@ -25,12 +25,12 @@ _Time = new Date();
 
 // const _Observer = new Astronomy.Observer(90, 0, 0);
 // _Observer = new Astronomy.Observer(90, 0, 0);
-cityname = "oakland"
-_Observer = new Astronomy.Observer(37.840270071049474, -122.24752870381347, 0); // oakland
+// cityname = "oakland"
+// _Observer = new Astronomy.Observer(37.840270071049474, -122.24752870381347, 0); // oakland
 // _Time.setHours(_Time.getHours() + 6)
-// cityname = "dallas"
-// _Observer = new Astronomy.Observer(32.8636119866438, -96.94304257650627, 0); // dallas
-// _Time.setHours(_Time.getHours() - 8)
+cityname = "dallas"
+_Observer = new Astronomy.Observer(33.014996366375, -96.67997803873509, 0); // dallas
+_Time.setHours(_Time.getHours() + 5)
 
 // const _Observer = new Astronomy.Observer(33.02019285171668, -76.68064645176072, 0);
 const Rotation_HOR_EQJ = Astronomy.Rotation_HOR_EQJ( _Time, _Observer);
@@ -42,9 +42,9 @@ var center = [1000,1000]
 eclipticCenter = fromCelestialHour(18,66.5)
 
 let drawraditionalHouses = false
-let drawStars = true;
+let drawStars = false;
 let drawOrbits = true;
-let drawConjunctions = false;
+let drawConjunctions = true;
 
 function drawGrid(chart, zodiacCenters) {
 
@@ -159,22 +159,20 @@ function drawGrid(chart, zodiacCenters) {
     // chart.circle(400).cx(center[0]).cy(center[1]).stroke('#aaa').fill("none")
     // chart.circle(500).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
 
-
     // heres where we project the horizon and houses on
+    function transfromHorizToScreen(horiz) {
+        var horizVector =  Astronomy.VectorFromHorizon(horiz, _Time);
+        var EQJ  = Astronomy.RotateVector(Rotation_HOR_EQJ, horizVector);
+        var EQJ2000 = Astronomy.EquatorFromVector(EQJ, _Time, null)
+        return fromCelestialHour(EQJ2000.ra, EQJ2000.dec)
+    }
 
     var lastPoint = []
 
     for ( var i = 10 ; i < 200; i ++ ) {
-        const horiz = new Astronomy.Spherical(
-            i , 0, 1.0);                   /* any positive distance value will work fine. */
-    
-        var horizVector =  Astronomy.VectorFromHorizon(horiz, _Time);
-    
-        var EQJ  = Astronomy.RotateVector(Rotation_HOR_EQJ, horizVector);
+        const horiz = new Astronomy.Spherical(  i , 0, 1.0);                   /* any positive distance value will work fine. */
+        coord = transfromHorizToScreen(horiz)
         
-        var EQJ2000 = Astronomy.EquatorFromVector(EQJ, _Time, null)
-
-        coord = fromCelestialHour(EQJ2000.ra, EQJ2000.dec)
         if ( i > 10) {
             chart.line(lastPoint[0], lastPoint[1], coord[0], coord[1]).stroke('#f0f').fill("none").scale(2)
 
@@ -183,42 +181,86 @@ function drawGrid(chart, zodiacCenters) {
     }
 
     for ( var i = 0 ; i < 361; i ++ ) {
-        const horiz = new Astronomy.Spherical(
-            0, i , 100.0);                   /* any positive distance value will work fine. */
-    
-        var horizVector =  Astronomy.VectorFromHorizon(horiz, _Time);
-    
-        var EQJ  = Astronomy.RotateVector(Rotation_HOR_EQJ, horizVector);
-        
-        var EQJ2000 = Astronomy.EquatorFromVector(EQJ, _Time, null)
+        const horiz = new Astronomy.Spherical(  0, i , 100.0);                   /* any positive distance value will work fine. */
+        coord = transfromHorizToScreen(horiz)
 
-        coord = fromCelestialHour(EQJ2000.ra, EQJ2000.dec)
         if ( i > 0) {
             chart.line(lastPoint[0], lastPoint[1], coord[0], coord[1]).stroke('#f0f').fill("none").scale(2)
 
         }
         lastPoint = coord;
     }
-
-
 
     for ( var i = 0 ; i < 180; i ++ ) {
-        const horiz = new Astronomy.Spherical(
-            i , 90, 100.0);                   /* any positive distance value will work fine. */
-    
-        var horizVector =  Astronomy.VectorFromHorizon(horiz, _Time);
-    
-        var EQJ  = Astronomy.RotateVector(Rotation_HOR_EQJ, horizVector);
-        
-        var EQJ2000 = Astronomy.EquatorFromVector(EQJ, _Time, null)
+        const horiz = new Astronomy.Spherical(  i , 90, 100.0);                   /* any positive distance value will work fine. */
+        coord = transfromHorizToScreen(horiz)
 
-        coord = fromCelestialHour(EQJ2000.ra, EQJ2000.dec)
         if ( i > 0) {
             chart.line(lastPoint[0], lastPoint[1], coord[0], coord[1]).stroke('#f0f').fill("none").scale(2)
 
         }
         lastPoint = coord;
     }
+
+
+    function DrawArrow(point, length, rad, arrowWidth, center) {
+
+        angle = getAngle(point, center)
+        point2 = fromRadial(angle, rad - length *0.5, center)
+        point1 = setDistance(point, rad + length *0.5, center)
+
+        arr0 = fromRadial(angle + arrowWidth, rad + length*0.5-20, center)
+        arr1 = fromRadial(angle - arrowWidth, rad + length*0.5-20, center)
+
+        chart.line(point1[0], point1[1], arr0[0], arr0[1]).stroke('#f00').fill("none").scale(1)
+        chart.line(point1[0], point1[1], arr1[0], arr1[1]).stroke('#f00').fill("none").scale(1)
+        chart.line(point1[0], point1[1], point2[0], point2[1]).stroke('#f00').fill("none").scale(1)
+
+    }
+
+    newSchoolRad = 400
+
+
+    // /--------------------------------------------ASCendant
+
+    var ascPoint = transfromHorizToScreen(new Astronomy.Spherical(  0 , 90, 100.0))
+    var EText = setDistance(ascPoint, newSchoolRad - 20, eclipticCenter)
+    var angle = getAngle(EText, eclipticCenter)
+    chart.text( "AC(E)").cx(EText[0]).cy(EText[1]).fill("#f00").rotate(angle * rad2deg + 90 ).font("Family", "Menlo").font("size", 35)
+
+    DrawArrow(ascPoint, 100, oldSchoolRad + 25, 0.05)
+    DrawArrow(ascPoint, 100, newSchoolRad + 25, 0.02, eclipticCenter)
+
+
+    // /--------------------------------------------Descendant
+    var dscPoint = transfromHorizToScreen(new Astronomy.Spherical(  0 , -90, 100.0))
+    var WText = setDistance(dscPoint, newSchoolRad - 20, eclipticCenter)
+    var angle = getAngle(WText, eclipticCenter) 
+    chart.text( "DC(W)").cx(WText[0]).cy(WText[1]).fill("#f00").rotate(angle * rad2deg + 90).font("Family", "Menlo").font("size", 35)
+
+    DrawArrow(dscPoint, 100, oldSchoolRad + 25, 0.05)
+    DrawArrow(dscPoint, 100, newSchoolRad + 25, 0.02, eclipticCenter)
+
+
+    var ascPoint = transfromHorizToScreen(new Astronomy.Spherical(  90 , 0, 100.0))
+    var SText = setDistance(ascPoint, newSchoolRad - 20, eclipticCenter)
+    var angle = getAngle(SText, eclipticCenter)
+    chart.text( "MC(S)").cx(SText[0]).cy(SText[1]).fill("#f00").rotate(angle * rad2deg + 90 ).font("Family", "Menlo").font("size", 35)
+
+    DrawArrow(ascPoint, 100, oldSchoolRad + 25, 0.05)
+    DrawArrow(ascPoint, 100, newSchoolRad + 25, 0.02, eclipticCenter)
+
+
+    // /--------------------------------------------Descendant
+    var dscPoint = transfromHorizToScreen(new Astronomy.Spherical( -90 , 0, 100.0))
+    var NText = setDistance(dscPoint, newSchoolRad - 20, eclipticCenter)
+    var angle = getAngle(NText, eclipticCenter) 
+    chart.text( "IC(N)").cx(NText[0]).cy(NText[1]).fill("#f00").rotate(angle * rad2deg + 90).font("Family", "Menlo").font("size", 35)
+    DrawArrow(dscPoint, 100, oldSchoolRad + 25, 0.05)
+    DrawArrow(dscPoint, 100, newSchoolRad + 25, 0.02, eclipticCenter)
+
+
+
 }
 
 function createPlot() {
