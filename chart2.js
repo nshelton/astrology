@@ -14,14 +14,15 @@ rad2deg = 1/deg2rad;
 
 // var _Time = new Date('June 11, 1989 23:05:00')
 // _Time = new Date('June 21, 1959 23:05:00')
-_Time = new Date('April 10, 1991 23:05:00 GMT')
+_Time = new Date('April 10, 1991 23:05:00 CDT')
+// _Time = new Date('December 23, 2014 16:20:00 GMT')
 // _Time = new Date();
-// _Time = new Date('September 19, 1990 07:47:00 PST')
-// _Time = new Date('October 22, 1986 17:10:00 PST')
-// _Time.setMonth( Math.round(Math.random() * 11) )
-// _Time.setDate(Math.floor(Math.random() * 30))
-// _Time.setHours(Math.floor(Math.random() * 24))
-// _Time.setFullYear(Math.floor(Math.random() *40 + 1980))
+_Time = new Date('September 19, 1990 07:47:00 PST')
+_Time = new Date('October 22, 1986 17:10:00 PST')
+_Time.setMonth( Math.round(Math.random() * 11) )
+_Time.setDate(Math.floor(Math.random() * 30))
+_Time.setHours(Math.floor(Math.random() * 24))
+_Time.setFullYear(Math.floor(Math.random() *40 + 1980))
 
 // const _Observer = new Astronomy.Observer(90, 0, 0);
 // _Observer = new Astronomy.Observer(90, 0, 0);
@@ -30,7 +31,11 @@ _Time = new Date('April 10, 1991 23:05:00 GMT')
 // _Time.setHours(_Time.getHours() + 6)
 cityname = "dallas"
 _Observer = new Astronomy.Observer(33.014996366375, -96.67997803873509, 0); // dallas
-_Time.setHours(_Time.getHours() + 5)
+// _Time.setHours(_Time.getHours() + 5)
+
+// cityname = "paris"
+// _Observer = new Astronomy.Observer(48.862420104011264, 2.356997754939505, 0); 
+// _Time.setHours(_Time.getHours() + 1)
 
 // const _Observer = new Astronomy.Observer(33.02019285171668, -76.68064645176072, 0);
 const Rotation_HOR_EQJ = Astronomy.Rotation_HOR_EQJ( _Time, _Observer);
@@ -39,7 +44,7 @@ var radialProjection = true
 var scale = 200
 var center = [1000,1000]
 
-eclipticCenter = fromCelestialHour(18,66.5)
+ellipticCenter = fromCelestialHour(18,66.5)
 
 let drawraditionalHouses = false
 let drawStars = false;
@@ -51,7 +56,7 @@ function drawGrid(chart, zodiacCenters) {
     var zodiacAngles = []
 
     for(var i = 0; i < zodiacCenters.length; i++) {
-        zodiacAngles.push(getAngle(zodiacCenters[i], eclipticCenter))
+        zodiacAngles.push(getAngle(zodiacCenters[i], ellipticCenter))
     }
         
     zodiacAngles.sort(function(a,b) {
@@ -69,23 +74,11 @@ function drawGrid(chart, zodiacCenters) {
     }
 
     var oldSchoolRad = 150
-    // HOUSE ticks
-    for(var x = 0; x < zodiacBoundaries.length; x ++) {
-        pos0 = fromRadial(zodiacBoundaries[x], 425, eclipticCenter)
-        pos1 = setDistance(pos0, 400, eclipticCenter)
+    
 
-        chart.line(pos0[0], pos0[1], pos1[0], pos1[1]).stroke('#aaa').fill("none")
-
-        theta = Math.PI * 2 * x / zodiacBoundaries.length
-        pos0 = fromRadial(theta, oldSchoolRad + 50, center)
-        pos1 = setDistance(pos0, oldSchoolRad, center)
-
-        chart.line(pos0[0], pos0[1], pos1[0], pos1[1]).stroke('#aaa').fill("none")
-        // chart.text(x.toFixed(2)).move(pos1[0]+ 30,pos1[1]).fill("#aaa").font("Family", "Menlo")
-    }
-
-    chart.circle(800).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
-    chart.circle(850).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
+    chart.circle(800).cx(ellipticCenter[0]).cy(ellipticCenter[1]).stroke('#aaa').fill("none")
+    chart.circle(850).cx(ellipticCenter[0]).cy(ellipticCenter[1]).stroke('#aaa').fill("none")
+    chart.circle(750).cx(ellipticCenter[0]).cy(ellipticCenter[1]).stroke('#aaa').fill("none")
 
     // chart.circle(900).cx(center[0]).cy(center[1]).stroke('#aaa').fill("none")
     chart.circle(oldSchoolRad*2).cx(center[0]).cy(center[1]).stroke('#aaa').fill("none")
@@ -97,7 +90,7 @@ function drawGrid(chart, zodiacCenters) {
 
         // astronomical symbols
         for(var x = 0; x < 12; x ++) {
-            var pos = fromRadial(zodiacAngles[x], 410, eclipticCenter);
+            var pos = fromRadial(zodiacAngles[x], 410, ellipticCenter);
             var index = (11 - x - 7 + 12) %12;
 
             var off =  90 - 360/24
@@ -114,13 +107,7 @@ function drawGrid(chart, zodiacCenters) {
             chart.text(symbols[index]).cx(pos[0]).cy(pos[1]).rotate(angle * rad2deg + 90).scale(2).fill("none").stroke({ color: '#0f0', width: 0.3})
         }
 
-        // house numbers
-        for(var x = 0; x < 12; x ++) {
-            var theta = Math.PI * 2 * (x /12 ) + 1 * Math.PI /12
-            var pos = fromRadial(-theta , oldSchoolRad - 25, center);
-            var ra = x + 1
-            chart.text( ra.toFixed(0)).cx(pos[0]).cy(pos[1]).scale(1).rotate(-theta * rad2deg - 90).fill("#f00").font("Family", "Menlo")
-        }
+   
 
 
     } else {
@@ -149,15 +136,15 @@ function drawGrid(chart, zodiacCenters) {
     
     chart.line(pos0[0], pos0[1], pos1[0], pos1[1]).stroke('#aaa').fill("none")
 
-    chart.circle(5).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
-    chart.circle(166).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
-    chart.circle(400).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
+    chart.circle(5).cx(ellipticCenter[0]).cy(ellipticCenter[1]).stroke('#aaa').fill("none")
+    chart.circle(166).cx(ellipticCenter[0]).cy(ellipticCenter[1]).stroke('#aaa').fill("none")
+    chart.circle(400).cx(ellipticCenter[0]).cy(ellipticCenter[1]).stroke('#aaa').fill("none")
 
     
     chart.circle(5).cx(center[0]).cy(center[1]).stroke('#aaa').fill("none")
     chart.circle(200).cx(center[0]).cy(center[1]).stroke('#aaa').fill("none")
     // chart.circle(400).cx(center[0]).cy(center[1]).stroke('#aaa').fill("none")
-    // chart.circle(500).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
+    // chart.circle(500).cx(ellipticCenter[0]).cy(ellipticCenter[1]).stroke('#aaa').fill("none")
 
     // heres where we project the horizon and houses on
     function transfromHorizToScreen(horiz) {
@@ -222,43 +209,125 @@ function drawGrid(chart, zodiacCenters) {
 
 
     // /--------------------------------------------ASCendant
-
+    var textOffset = 30
     var ascPoint = transfromHorizToScreen(new Astronomy.Spherical(  0 , 90, 100.0))
-    var EText = setDistance(ascPoint, newSchoolRad - 20, eclipticCenter)
-    var angle = getAngle(EText, eclipticCenter)
-    chart.text( "AC(E)").cx(EText[0]).cy(EText[1]).fill("#f00").rotate(angle * rad2deg + 90 ).font("Family", "Menlo").font("size", 35)
+    var EText = setDistance(ascPoint, newSchoolRad + textOffset, ellipticCenter)
+    var angle = getAngle(EText, ellipticCenter)
+    chart.text( "AC").cx(EText[0]).cy(EText[1]).fill("#f00").rotate(angle * rad2deg + 90 ).font("Family", "Menlo").font("size", 35)
 
     DrawArrow(ascPoint, 100, oldSchoolRad + 25, 0.05)
-    DrawArrow(ascPoint, 100, newSchoolRad + 25, 0.02, eclipticCenter)
+    DrawArrow(ascPoint, 100, newSchoolRad + 25, 0.02, ellipticCenter)
 
 
     // /--------------------------------------------Descendant
     var dscPoint = transfromHorizToScreen(new Astronomy.Spherical(  0 , -90, 100.0))
-    var WText = setDistance(dscPoint, newSchoolRad - 20, eclipticCenter)
-    var angle = getAngle(WText, eclipticCenter) 
-    chart.text( "DC(W)").cx(WText[0]).cy(WText[1]).fill("#f00").rotate(angle * rad2deg + 90).font("Family", "Menlo").font("size", 35)
+    var WText = setDistance(dscPoint, newSchoolRad + textOffset, ellipticCenter)
+    var angle = getAngle(WText, ellipticCenter) 
+    chart.text( "DC").cx(WText[0]).cy(WText[1]).fill("#f00").rotate(angle * rad2deg + 90).font("Family", "Menlo").font("size", 35)
 
     DrawArrow(dscPoint, 100, oldSchoolRad + 25, 0.05)
-    DrawArrow(dscPoint, 100, newSchoolRad + 25, 0.02, eclipticCenter)
+    DrawArrow(dscPoint, 100, newSchoolRad + 25, 0.02, ellipticCenter)
+
+    // /--------------------------------------------MC
+    var mcPoint = transfromHorizToScreen(new Astronomy.Spherical(  90 , 0, 100.0))
+    var SText = setDistance(mcPoint, newSchoolRad + textOffset, ellipticCenter)
+    var angle = getAngle(SText, ellipticCenter)
+    chart.text( "MC").cx(SText[0]).cy(SText[1]).fill("#f00").rotate(angle * rad2deg + 90 ).font("Family", "Menlo").font("size", 35)
+
+    DrawArrow(mcPoint, 100, oldSchoolRad + 25, 0.05)
+    DrawArrow(mcPoint, 100, newSchoolRad + 25, 0.02, ellipticCenter)
 
 
-    var ascPoint = transfromHorizToScreen(new Astronomy.Spherical(  90 , 0, 100.0))
-    var SText = setDistance(ascPoint, newSchoolRad - 20, eclipticCenter)
-    var angle = getAngle(SText, eclipticCenter)
-    chart.text( "MC(S)").cx(SText[0]).cy(SText[1]).fill("#f00").rotate(angle * rad2deg + 90 ).font("Family", "Menlo").font("size", 35)
+    // /--------------------------------------------IC
+    var icPoint = transfromHorizToScreen(new Astronomy.Spherical( -90 , 0, 100.0))
+    var NText = setDistance(icPoint, newSchoolRad + textOffset, ellipticCenter)
+    var angle = getAngle(NText, ellipticCenter) 
+    chart.text( "IC").cx(NText[0]).cy(NText[1]).fill("#f00").rotate(angle * rad2deg + 90).font("Family", "Menlo").font("size", 35)
+    DrawArrow(icPoint, 100, oldSchoolRad + 25, 0.05)
+    DrawArrow(icPoint, 100, newSchoolRad + 25, 0.02, ellipticCenter)
 
-    DrawArrow(ascPoint, 100, oldSchoolRad + 25, 0.05)
-    DrawArrow(ascPoint, 100, newSchoolRad + 25, 0.02, eclipticCenter)
+
+    // QUADRTANTS>??
+
+    function createPorphyryHouses() {
+        var a0 = getAngle(ascPoint, ellipticCenter)
+        var a1 = getAngle(mcPoint, ellipticCenter)
+        var a2 = getAngle(dscPoint, ellipticCenter)
+        var a3 = getAngle(icPoint, ellipticCenter)
+        markers = [a0, a1, a2, a3]
+        markers.sort(function(a,b) {
+            return (+a) - (+b);
+        });
+
+        console.log(markers)
+        var houses = [
+            markers[0],
+            markers[0] * 0.666 + markers[1] * 0.333,
+            markers[0] * 0.333 + markers[1] * 0.666,
+            markers[1],
+            markers[1] * 0.666 + markers[2] * 0.333,
+            markers[1] * 0.333 + markers[2] * 0.666,
+            markers[2],
+            markers[2] * 0.666 + markers[3] * 0.333,
+            markers[2] * 0.333 + markers[3] * 0.666,
+            markers[3],
+            markers[3] * 0.666 + (markers[0] + Math.PI * 2) * 0.333,
+            markers[3] * 0.333 + (markers[0] + Math.PI * 2) * 0.666
+        ]
+
+        var ACIndex = houses.indexOf(a0)
+
+        // rotate so Asc is 0 
+        houses = houses.slice(ACIndex, houses.length).concat(houses.slice(0,ACIndex));
+
+        return houses
+    }
+
+    // zodiac ticks
+    for(var x = 0; x < zodiacBoundaries.length; x ++) {
+        pos0 = fromRadial(zodiacBoundaries[x], 425, ellipticCenter)
+        pos1 = setDistance(pos0, 400, ellipticCenter)
+
+        chart.line(pos0[0], pos0[1], pos1[0], pos1[1]).stroke('#aaa').fill("none")
+
+        theta = Math.PI * 2 * x / zodiacBoundaries.length
+        pos0 = fromRadial(theta, oldSchoolRad + 50, center)
+        pos1 = setDistance(pos0, oldSchoolRad, center)
+
+        chart.line(pos0[0], pos0[1], pos1[0], pos1[1]).stroke('#aaa').fill("none")
+        // chart.text(x.toFixed(2)).move(pos1[0]+ 30,pos1[1]).fill("#aaa").font("Family", "Menlo")
+    }
 
 
-    // /--------------------------------------------Descendant
-    var dscPoint = transfromHorizToScreen(new Astronomy.Spherical( -90 , 0, 100.0))
-    var NText = setDistance(dscPoint, newSchoolRad - 20, eclipticCenter)
-    var angle = getAngle(NText, eclipticCenter) 
-    chart.text( "IC(N)").cx(NText[0]).cy(NText[1]).fill("#f00").rotate(angle * rad2deg + 90).font("Family", "Menlo").font("size", 35)
-    DrawArrow(dscPoint, 100, oldSchoolRad + 25, 0.05)
-    DrawArrow(dscPoint, 100, newSchoolRad + 25, 0.02, eclipticCenter)
+    var housePositions = createPorphyryHouses()
+    var houseLabels = []
+    for ( var i = 0 ; i < housePositions.length; i ++) {
+        var a0 = housePositions[i];
+        var a1 = housePositions[(i + 1) %12];
+        var mina = Math.min(a0, a1)
+        var maxa = Math.max(a0, a1)
+        if (maxa - mina > Math.PI ) {
+            mina += Math.PI * 2
+        }
+        houseLabels.push((mina + maxa)/2)
+    }
 
+     // house numbers
+     for(var x = 0; x < 12; x ++) {
+
+        var ra = 12 - x 
+
+        thetaTick = housePositions[x]
+        pos0 = fromRadial(thetaTick, newSchoolRad - 25, ellipticCenter)
+        pos1 = fromRadial(thetaTick, newSchoolRad , ellipticCenter)
+
+        var textString =ra.toFixed(0) + " : " + getHouseInfo(ra);
+        label = fromRadial(houseLabels[x], newSchoolRad-15, ellipticCenter)
+        theta = houseLabels[x]
+
+        chart.line(pos0[0], pos0[1], pos1[0], pos1[1]).stroke('#aaa').fill("none")
+        chart.text(textString).cx(label[0]).cy(label[1]).scale(1).rotate(theta * rad2deg + 90).fill("#aaa").font("Family", "Menlo")
+    }
 
 
 }
@@ -324,7 +393,7 @@ function createPlot() {
                 var centroid = [c[0]/n, c[1]/n]
 
                 zodiacCenters.push([centroid[0], centroid[1]])
-                // label = setDistance(centroid, 130, eclipticCenter);
+                // label = setDistance(centroid, 130, ellipticCenter);
                 // var text = chart.text(elements[index]).cx(label[0]).cy(label[1]).scale(2).fill("none").stroke({ color: '#0f0', width: 0.3}).font("Family", "Menlo")
                 // chart.text( ra.toFixed(2)).move(label[0]+ 30,label[1]).fill("#0f0").font("Family", "Menlo")
 
@@ -373,7 +442,7 @@ function createPlot() {
         }
 
         if ( drawConjunctions) {
-            conjunctions = findConjunctions(planetLocations, 0.1, eclipticCenter)
+            conjunctions = findConjunctions(planetLocations, 0.1, ellipticCenter)
         
             console.log(conjunctions)
             for (var i = 0; i < conjunctions.length; i ++) {
@@ -381,7 +450,7 @@ function createPlot() {
                     chart.line(jitter(trimLine(conjunctions[i],0.9), 3)).stroke({ color: '#ff0'}) 
                  }
             }
-            conjunctions = findConjunctions(planetLocations, 0.2, eclipticCenter)
+            conjunctions = findConjunctions(planetLocations, 0.2, ellipticCenter)
             for (var i = 0; i < conjunctions.length; i ++) {
                 chart.line(jitter(trimLine(conjunctions[i],0.9), 3)).stroke({ color: '#ff0'}) 
             }
@@ -412,7 +481,7 @@ function createPlot() {
         }
 
         planetRad = 500
-        labels = layoutPlanetLabels(planetLocations, planetRad, eclipticCenter)
+        labels = layoutPlanetLabels(planetLocations, planetRad, ellipticCenter)
 
         for (var i = 0; i < planetNames.length; i ++) {
 
@@ -421,13 +490,13 @@ function createPlot() {
             var planetLocation = planetLocations[name]
 
 
-            var lineDst = setDistance(planetLocation, planetRad, eclipticCenter);
+            var lineDst = setDistance(planetLocation, planetRad, ellipticCenter);
  
 
             var hor = planetRAs[name]
 
-            var pos3 = setDistance(location, getDistance(location, eclipticCenter) + 70, eclipticCenter);
-            var angle = getAngle(location, eclipticCenter)
+            var pos3 = setDistance(location, getDistance(location, ellipticCenter) + 70, ellipticCenter);
+            var angle = getAngle(location, ellipticCenter)
 
             chart.line(lineDst[0], lineDst[1], planetLocation[0], planetLocation[1]).stroke("#888").fill("none")
 
