@@ -13,7 +13,8 @@ deg2rad =  0.01745329252;
 rad2deg = 1/deg2rad;
 
 // var _Time = new Date('June 11, 1989 23:05:00')
-var _Time = new Date('June 21, 1959 23:05:00')
+// _Time = new Date('June 21, 1959 23:05:00')
+_Time = new Date('April 10, 1991 23:05:00')
 // _Time.setMonth( Math.round(Math.random() * 11) )
 // _Time.setDate(Math.floor(Math.random() * 30))
 // _Time.setHours(Math.floor(Math.random() * 24))
@@ -21,11 +22,10 @@ var _Time = new Date('June 21, 1959 23:05:00')
 _Time.setHours(_Time.getHours() + 8)
 
 // const _Observer = new Astronomy.Observer(90, 0, 0);
-const _Observer = new Astronomy.Observer(90, 0, 0);
+_Observer = new Astronomy.Observer(90, 0, 0);
 // const _Observer = new Astronomy.Observer(33.02019285171668, -76.68064645176072, 0);
 
-
-var radialProjection = false
+var radialProjection = true
 var scale = 200
 var center = [700,700]
 var eclipticCenterICSC = [-90,65] // just guessed at this 
@@ -39,44 +39,51 @@ let drawConjunctions = false;
 function drawGrid(chart, zodiacRAs) {
 
     zodiacRAs.sort(function(a,b) {
-        return (+a) - (+b);
-      });
+        return (+a[1]) - (+b[1]);
+    });
 
-    console.log(zodiacRAs)
+    console.log("zodiacRAs", zodiacRAs)
     zodiacBoundaries = []
 
     for(var i = 0; i < zodiacRAs.length; i++) {
         if ( i == 11){
-            zodiacBoundaries.push((zodiacRAs[i] + 24 + zodiacRAs[(i+1) %12] ) / 2) 
+            zodiacBoundaries.push((zodiacRAs[i][1] + 24 + zodiacRAs[(i[1]+1) %12] ) / 2) 
         } else {
-            zodiacBoundaries.push((zodiacRAs[i] + zodiacRAs[(i+1) %12] ) / 2) 
+            zodiacBoundaries.push((zodiacRAs[i][1] + zodiacRAs[(i[1]+1) %12] ) / 2) 
         }
     }
 
     console.log(zodiacBoundaries)
 
+    for(var x = 0; x < zodiacRAs.length; x ++) {
+        pos0 = fromCelestialHour(zodiacRAs[x][1], 1)
+        pos1 = fromCelestialHour(zodiacRAs[x][1], -1)
+
+        chart.line(pos0[0], pos0[1], pos1[0], pos1[1]).stroke('#f00').fill("none").scale(4)
+        chart.text( zodiacRAs[x][1].toFixed(2)).move(pos1[0]+ 30,pos1[1]).fill("#f00").font("Family", "Menlo")
+
+    }
+
     // for(var x = 0; x < zodiacBoundaries.length; x ++) {
-    //     pos0 = transformHourCelestialToEarth([zodiacBoundaries[x],  0])
-    //     pos1 = transformHourCelestialToEarth([zodiacBoundaries[x], -60])
-        
+    //     pos0 = transformHourCelestialToEarth([zodiacBoundaries[x], 10])
+    //     pos1 = transformHourCelestialToEarth([zodiacBoundaries[x], 0])
     //     chart.line(pos0[0], pos0[1], pos1[0], pos1[1]).stroke('#f00').fill("none").scale(4)
     //     chart.text( zodiacBoundaries[x].toFixed(2)).move(pos1[0]+ 30,pos1[1]).fill("#f00").font("Family", "Menlo")
-
     // }
   
     if ( radialProjection ) {
-        for(var x = 0; x < 6; x ++) {
-            var theta = x * Math.PI / 6 ;
-            var pos0 = fromRadial(theta, 500,  eclipticCenter)
-            var pos1 = fromRadial(theta, -500,  eclipticCenter)
+        for(var x = 0; x < 12; x ++) {
+            var theta = x*2;
+            var pos0 = fromCelestialHour(theta, 90 )
+            var pos1 = fromCelestialHour(theta, 10)
             chart.line([pos0, pos1]).stroke('#aaa').fill("none").style("dot")
         }
     
-        chart.circle(100).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
-        chart.circle(200).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
-        chart.circle(450).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
-        chart.circle(900).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
-        chart.circle(700).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
+        // chart.circle(100).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
+        // chart.circle(200).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
+        // chart.circle(450).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
+        // chart.circle(900).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
+        // chart.circle(700).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
     
         // chart.circle(174).cx(center[0]).cy(center[1]).stroke('#aaa').fill("none")
     
@@ -88,8 +95,8 @@ function drawGrid(chart, zodiacRAs) {
 
                 var py = y / 50 * 180 - 90;
 
-                var a = transformDegreesCelestialToEarth([px, lasty])
-                var b = transformDegreesCelestialToEarth([px, py])
+                var a = fromCelestialLonLat([px, lasty])
+                var b = fromCelestialLonLat([px, py])
 
                 var line = chart.line(a[0], a[1], b[0], b[1]).stroke('#aaa').fill("none")
                 lasty = py;
@@ -97,12 +104,12 @@ function drawGrid(chart, zodiacRAs) {
         }
     }
    
-    pos0 = transformDegreesCelestialToEarth([0, 85])
-    pos1 = transformDegreesCelestialToEarth([0, 95])
+    pos0 = fromCelestialLonLat(0, 85)
+    pos1 = fromCelestialLonLat(0, 95)
     
     chart.line(pos0[0], pos0[1], pos1[0], pos1[1]).stroke('#f00').fill("none").scale(4)
-    pos0 = transformDegreesCelestialToEarth([90, 85])
-    pos1 = transformDegreesCelestialToEarth([90, 95])
+    pos0 = fromCelestialLonLat(90, 85)
+    pos1 = fromCelestialLonLat(90, 95)
     
     chart.line(pos0[0], pos0[1], pos1[0], pos1[1]).stroke('#f00').fill("none").scale(4)
 
@@ -111,65 +118,7 @@ function drawGrid(chart, zodiacRAs) {
     // chart.circle(450).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
 }
 
-function getColor(body) {
-    let colors = {
-        'Sun' : "#ff6", 
-        'Moon' : "#555",
-        'Mercury' : "#841",
-        'Venus' : "#f90", 
-        'Mars' : "#0f0", 
-        'Jupiter' : "#482",
-        'Saturn' : "#0ff", 
-        'Uranus' : "#f0f",
-        'Neptune' : "#00f",
-        'Pluto': "#bbb",
-    }
 
-    return colors[body]
-}
-
-function length(p) {
-    return sqrt(p[0] * p[0] + p[1] * p[1])
-}
-
-function distance(p1,p2) {
-    var dx =  p1[0] - p2[0]
-    var dy =  p1[1] - p2[1]
-    return length([dx,dy])
-}
-
-function setDistance(p, rad, c = center) {
-    var _cx = (p[0] - c[0])
-    var _cy = (p[1] - c[1])
-
-    var angle = atan2(_cy, _cx)
-    
-    var result = [0,0]
-    result[0] = rad * cos(angle) + c[0];
-    result[1] = rad * sin(angle) + c[1];
-    return result;
-}
-
-function getDistance(p, c = center) {
-    var _cx = (p[0] - c[0])
-    var _cy = (p[1] - c[1])
-   return length([_cx, _cy])
-}
-
-function getAngle(p, c = center) {
-    var _cx = (p[0] - c[0])
-    var _cy = (p[1] - c[1])
-    var angle = atan2(_cy, _cx)
-    return angle;
-}
-
-function fromRadial(theta, rad, c = center) {
-    var result = [0,0]
-    result[0] = rad * cos(theta) + c[0];
-    result[1] = rad * sin(theta) + c[1];
-    return result;
-
-}
 
 function createPlot() {
 
@@ -183,11 +132,11 @@ function createPlot() {
                 var coord = json.features[i].geometry.coordinates
                 var mag = parseFloat(json.features[i].properties.mag);
     
-                if (mag > 4)
+                if (mag > 5)
                     continue;
      
-                r = 2 * Math.pow(4 - mag, 0.7); // replace 20 with dimmest magnitude in the data
-                coord = transformDegreesCelestialToEarth(coord)
+                r = 2 * Math.pow(5 - mag, 1.2); // replace 20 with dimmest magnitude in the data
+                coord = fromCelestialLonLat(coord[0], coord[1])
                 rect = chart.circle(r).cx(coord[0]).cy(coord[1]).stroke('#f06').fill("none")
             }
     
@@ -196,10 +145,7 @@ function createPlot() {
 
     $.getJSON("./constellations.lines.json", function(json) {
 
-        var zodiac = ["Vir","Ari","Cap","Cnc","Leo","Gem","Lib","Psc","Aqr","Sgr", "Sco", "Tau"]
-        var symbols = ["♍︎", "♈︎", "♑︎", "♋︎",  "♌︎", "♊︎", "♎︎", "♓︎", "♒︎", "♐︎", "♏︎", "♉︎"]
-        var elements = ["🜃", " 🜂", "🜃", "🜄",  " 🜂", "🜁", "🜁", "🜄", "🜁", " 🜂", "🜄", "🜃"]
-        var zodiacRAs = []
+         var zodiacRAs = []
 
         for(var i = 0; i < json.features.length; i ++) {
             var name = json.features[i].id;
@@ -213,24 +159,20 @@ function createPlot() {
                 
                 for(var k = 0; k < lines.length; k++) {
                     var coord = json.features[i].geometry.coordinates[k]
-                    var lastPoint = transformDegreesCelestialToEarth(coord[0])
+                     var lastPoint = fromCelestialLonLat(coord[0][0], coord[0][1])
 
                     for(var j = 1; j < coord.length; j++) {
                         
-                        cRA += coord[j][0]
-                        // console.log(name, coord[j][0], coord[j][1])
-                        // if ( name == "Psc" && coord[j][0] < 100 ) {
-                            // coord[j][0] += 360
-                            // console.log( coord[j][0], coord[j][1])
-                        // }
+                      
+                        var p = fromCelestialLonLat(coord[j][0], coord[j][1])
 
-                        var p = transformDegreesCelestialToEarth(coord[j])
-
-                        var line = chart.line(lastPoint[0], lastPoint[1], p[0], p[1]).stroke('#0f0').fill("none")
-                        
-                        n++;
-                        c[0] += p[0]
-                        c[1] += p[1]
+                        if ( abs(p[0] - lastPoint[0]) < 100) {
+                            chart.line(lastPoint[0], lastPoint[1], p[0], p[1]).stroke('#0f0').fill("none")
+                            cRA += coord[j][0]
+                            n++;
+                            c[0] += p[0]
+                            c[1] += p[1]
+                        } 
 
                         lastPoint = p
                     }
@@ -246,10 +188,10 @@ function createPlot() {
                 var text = chart.text(symbols[index]).cx(label[0]).cy(label[1]).scale(3).fill("none").stroke({ color: '#0f0', width: 0.3}).font("Family", "Menlo")
                 var ra = cRA/n * 24/360
 
-                while (ra <0) 
+                while (ra < 0) 
                     ra += 24;
 
-                zodiacRAs.push(ra)
+                zodiacRAs.push([name, +ra])
                 // label = setDistance(centroid, 130, eclipticCenter);
                 // var text = chart.text(elements[index]).cx(label[0]).cy(label[1]).scale(2).fill("none").stroke({ color: '#0f0', width: 0.3}).font("Family", "Menlo")
                 chart.text( ra.toFixed(2)).move(label[0]+ 30,label[1]).fill("#0f0").font("Family", "Menlo")
@@ -261,10 +203,6 @@ function createPlot() {
         drawGrid(chart, zodiacRAs)
 
 
-        let planetSymbols = ["☉", "☽", "☿", "♀", "♂", "♃", "♄", "⛢", "♆", "♇"]
-        let planetNames = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto']
-
-
         i = 0
 
         var planetLocations = {};
@@ -274,8 +212,8 @@ function createPlot() {
             let equ_2000 = Astronomy.Equator(body, _Time, _Observer, false, true);
             let equ_ofdate = Astronomy.Equator(body, _Time, _Observer, true, true);
             let hor = Astronomy.Horizon(_Time, _Observer, equ_ofdate.ra, equ_ofdate.dec, 'normal');
-            coord = transform(hor)
-
+            coord = fromCelestialHour(equ_ofdate.ra, equ_ofdate.dec)
+            console.log(equ_ofdate.ra, equ_ofdate.dec, coord)
             chart.circle(1).cx(coord[0]).cy(coord[1]).stroke('#0ff').fill('none')
             chart.circle(10).cx(coord[0]).cy(coord[1]).stroke('#0ff').fill('none')
             chart.circle(15).cx(coord[0]).cy(coord[1]).stroke('#0ff').fill("none")
@@ -287,79 +225,8 @@ function createPlot() {
             planetLocations[body] = coord
             planetRAs[body] = hor
 
-          
         
         }
-
-function layoutPlanetLabels(positions)  {
-
-    let newPositions = {}
-
-    // move to fixed radius
-    let angles = {}
-    for (var i = 0; i < planetNames.length; i ++) {
-        angles[planetNames[i]] =  getAngle(positions[planetNames[i]], eclipticCenter)
-    }
-
-    for ( var k = 0; k < 10; k ++) {
-        for (var i = 0; i < planetNames.length; i ++) {
-            for (var j = 0; j < planetNames.length; j++) {
-                var dist = abs(angles[planetNames[i]]- angles[planetNames[j]])
-                if(i != j && dist < 0.1) {
-                    
-                    var ai = angles[planetNames[i]];
-                    var aj = angles[planetNames[j]];
-                   
-                    var delta = sign(ai - aj) * 0.02;
-                
-                    angles[planetNames[i]] += delta;
-                    angles[planetNames[j]] -= delta;
-
-                
-                    // var sign = rad_i > rad_j ?  0.8 : 1.2
-
-                    // newPositions[planetNames[j]] = setDistance(newPositions[planetNames[j]], rad  * sign )
-                    // newPositions[planetNames[i]] = setDistance(newPositions[planetNames[i]], rad * 1/sign )
-
-                }
-            }
-
-        }
-    }
-
-    for (var i = 0; i < planetNames.length; i ++) {
-        newPositions[planetNames[i]] = fromRadial(angles[planetNames[i]], 400, eclipticCenter)
-    }
-
-
-    return newPositions
-}
-
-function findConjunctions(positions, thresh)  {
-    conj = []
-
-    // move to fixed radius
-    let angles = {}
-    for (var i = 0; i < planetNames.length; i ++) {
-        angles[planetNames[i]] =  getAngle(positions[planetNames[i]], eclipticCenter)
-        if ( angles[planetNames[i]] < 0 )
-            angles[planetNames[i]] += Math.PI * 2
-    }
-    
-    for (var i = 0; i < planetNames.length; i ++) {
-        for (var j = 0; j < planetNames.length; j ++) {
-
-            if(i != j && (
-                abs(angles[planetNames[i]] - angles[planetNames[j]]) < thresh ||
-                abs(abs(angles[planetNames[i]] - angles[planetNames[j]]) - Math.PI) < thresh   ||
-                abs(abs(angles[planetNames[i]] - angles[planetNames[j]]) - 2 * Math.PI / 3) < thresh  ||
-                abs(abs(angles[planetNames[i]] - angles[planetNames[j]]) - Math.PI/2) < thresh  )) {
-                    conj.push([positions[planetNames[i]], positions[planetNames[j]]]) 
-            }
-        }
-    }
-    return conj;
-}
 
 
         if ( drawConjunctions) {
@@ -375,7 +242,6 @@ function findConjunctions(positions, thresh)  {
             }
     
         }
-
 
         labels = layoutPlanetLabels(planetLocations)
 
@@ -406,7 +272,7 @@ function findConjunctions(positions, thresh)  {
                    let hor = Astronomy.Horizon(_Time, _Observer, equ_ofdate.ra, equ_ofdate.dec, 'normal');
                     // console.log(body.padEnd(8), (equ_2000.ra), (equ_2000.dec), (hor.azimuth), (hor.altitude));
                     // coord = transformDegreesCelestialToEarth([(equ_2000.ra), (equ_2000.dec)])
-                    coord = transform(hor)
+                    coord = fromCelestialHour(equ_ofdate.ra, equ_ofdate.dec)
                     if (i > 0)
                         chart.line(lastpos[0], lastpos[1], coord[0], coord[1]).stroke(getColor(body)).fill("none").scale(1)
                     lastpos = coord
