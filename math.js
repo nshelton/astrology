@@ -75,7 +75,7 @@ function fromCelestialLonLat(lon, lat) {
         var phi = lat * deg2rad ;
     
         var rho = Math.PI/2 - phi
-        var theta = Math.PI - lambda;
+        var theta = lambda;
     
         return [
              scale * rho * cos (theta) + center[0] ,

@@ -27,10 +27,9 @@ _Observer = new Astronomy.Observer(90, 0, 0);
 
 var radialProjection = true
 var scale = 200
-var center = [700,700]
-var eclipticCenterICSC = [-90,65] // just guessed at this 
+var center = [1000,1000]
 
-eclipticCenter = transformDegreesCelestialToEarth(eclipticCenterICSC)
+eclipticCenter = fromCelestialHour(18,66.5)
 
 let drawStars = true;
 let drawOrbits = true;
@@ -64,13 +63,6 @@ function drawGrid(chart, zodiacRAs) {
 
     }
 
-    // for(var x = 0; x < zodiacBoundaries.length; x ++) {
-    //     pos0 = transformHourCelestialToEarth([zodiacBoundaries[x], 10])
-    //     pos1 = transformHourCelestialToEarth([zodiacBoundaries[x], 0])
-    //     chart.line(pos0[0], pos0[1], pos1[0], pos1[1]).stroke('#f00').fill("none").scale(4)
-    //     chart.text( zodiacBoundaries[x].toFixed(2)).move(pos1[0]+ 30,pos1[1]).fill("#f00").font("Family", "Menlo")
-    // }
-  
     if ( radialProjection ) {
         for(var x = 0; x < 12; x ++) {
             var theta = x*2;
@@ -78,15 +70,7 @@ function drawGrid(chart, zodiacRAs) {
             var pos1 = fromCelestialHour(theta, 10)
             chart.line([pos0, pos1]).stroke('#aaa').fill("none").style("dot")
         }
-    
-        // chart.circle(100).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
-        // chart.circle(200).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
-        // chart.circle(450).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
-        // chart.circle(900).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
-        // chart.circle(700).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
-    
-        // chart.circle(174).cx(center[0]).cy(center[1]).stroke('#aaa').fill("none")
-    
+
     } else {
         for(var x = 0; x < 12; x ++) {
             var px = x /12 * 360 - 180
@@ -114,8 +98,8 @@ function drawGrid(chart, zodiacRAs) {
     chart.line(pos0[0], pos0[1], pos1[0], pos1[1]).stroke('#f00').fill("none").scale(4)
 
     // chart.circle(20).cx(pos0[0]).cy(pos0[1]).stroke('#aaa').fill('#f00')
-    // chart.circle(350).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
-    // chart.circle(450).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
+    chart.circle(10).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
+    chart.circle(40).cx(eclipticCenter[0]).cy(eclipticCenter[1]).stroke('#aaa').fill("none")
 }
 
 
