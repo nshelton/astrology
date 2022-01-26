@@ -14,24 +14,28 @@ rad2deg = 1/deg2rad;
 
 // var _Time = new Date('June 11, 1989 23:05:00')
 // _Time = new Date('June 21, 1959 23:05:00')
-_Time = new Date('April 10, 1991 23:05:00 CDT')
+// _Time = new Date('April 10, 1991 23:05:00 CDT')
+_Time = new Date('Dec 2, 1987 05:00:00 EST')
 // _Time = new Date('December 23, 2014 16:20:00 GMT')
 // _Time = new Date();
-_Time = new Date('September 19, 1990 07:47:00 PST')
-_Time = new Date('October 22, 1986 17:10:00 PST')
-_Time.setMonth( Math.round(Math.random() * 11) )
-_Time.setDate(Math.floor(Math.random() * 30))
-_Time.setHours(Math.floor(Math.random() * 24))
-_Time.setFullYear(Math.floor(Math.random() *40 + 1980))
+// _Time = new Date('September 19, 1990 07:47:00 PST')
+// _Time = new Date('October 22, 1986 17:10:00 PST')
+// _Time.setMonth( Math.round(Math.random() * 11) )
+// _Time.setDate(Math.floor(Math.random() * 30))
+// _Time.setHours(Math.floor(Math.random() * 24))
+// _Time.setFullYear(Math.floor(Math.random() *40 + 1980))
 
 // const _Observer = new Astronomy.Observer(90, 0, 0);
 // _Observer = new Astronomy.Observer(90, 0, 0);
 // cityname = "oakland"
 // _Observer = new Astronomy.Observer(37.840270071049474, -122.24752870381347, 0); // oakland
 // _Time.setHours(_Time.getHours() + 6)
-cityname = "dallas"
-_Observer = new Astronomy.Observer(33.014996366375, -96.67997803873509, 0); // dallas
+// cityname = "dallas"
+// _Observer = new Astronomy.Observer(33.014996366375, -96.67997803873509, 0); // dallas
 // _Time.setHours(_Time.getHours() + 5)
+
+cityname = "washington, DC"
+_Observer = new Astronomy.Observer(38.9240400110907, -77.00558584122027, 0); // dallas
 
 // cityname = "paris"
 // _Observer = new Astronomy.Observer(48.862420104011264, 2.356997754939505, 0); 
@@ -47,7 +51,7 @@ var center = [1000,1000]
 ellipticCenter = fromCelestialHour(18,66.5)
 
 let drawraditionalHouses = false
-let drawStars = false;
+let drawStars = true;
 let drawOrbits = true;
 let drawConjunctions = true;
 
@@ -106,8 +110,6 @@ function drawGrid(chart, zodiacCenters) {
             var off =  90 - 360/24
             chart.text(symbols[index]).cx(pos[0]).cy(pos[1]).rotate(angle * rad2deg + 90).scale(2).fill("none").stroke({ color: '#0f0', width: 0.3})
         }
-
-   
 
 
     } else {
@@ -321,12 +323,14 @@ function drawGrid(chart, zodiacCenters) {
         pos0 = fromRadial(thetaTick, newSchoolRad - 25, ellipticCenter)
         pos1 = fromRadial(thetaTick, newSchoolRad , ellipticCenter)
 
-        var textString =ra.toFixed(0) + " : " + getHouseInfo(ra);
-        label = fromRadial(houseLabels[x], newSchoolRad-15, ellipticCenter)
-        theta = houseLabels[x]
+        var textString = ra.toFixed(0) + " : " + getHouseInfo(ra);
+
+        thetaText = housePositions[x] + 0.01 * textString.length
+        label = fromRadial(thetaText, newSchoolRad-15, ellipticCenter)
+
 
         chart.line(pos0[0], pos0[1], pos1[0], pos1[1]).stroke('#aaa').fill("none")
-        chart.text(textString).cx(label[0]).cy(label[1]).scale(1).rotate(theta * rad2deg + 90).fill("#aaa").font("Family", "Menlo")
+        chart.text(textString).cx(label[0]).cy(label[1]).scale(1).rotate(thetaText * rad2deg + 90).fill("#aaa").font("Family", "Menlo")
     }
 
 
@@ -374,7 +378,6 @@ function createPlot() {
                      var lastPoint = fromCelestialLonLat(coord[0][0], coord[0][1])
 
                     for(var j = 1; j < coord.length; j++) {
-                        
                       
                         var p = fromCelestialLonLat(coord[j][0], coord[j][1])
 
@@ -411,13 +414,10 @@ function createPlot() {
         }
 
         function trimLine(line, a) {
-
             p0 = [ line[0][0] * a + line[1][0] * (1 - a), 
                    line[0][1] * a + line[1][1] * (1 - a)]
-
             p1 = [ line[1][0] * a + line[0][0] * (1 - a), 
                    line[1][1] * a + line[0][1] * (1 - a)]
-            
             return [p0,p1]
         }
 
@@ -492,7 +492,6 @@ function createPlot() {
 
             var lineDst = setDistance(planetLocation, planetRad, ellipticCenter);
  
-
             var hor = planetRAs[name]
 
             var pos3 = setDistance(location, getDistance(location, ellipticCenter) + 70, ellipticCenter);
@@ -502,7 +501,7 @@ function createPlot() {
 
             chart.text(planetSymbols[i]).cx(location[0]).cy(location[1]).scale(4).rotate(angle * rad2deg - 90 ).fill("none").stroke({ color: '#0ff', width: 0.3}) 
 
-            chart.text( hor.ra.toFixed(2)).cx(pos3[0]).cy(pos3[1]).scale(1.5).rotate(angle * rad2deg ).fill("#0ff").font("Family", "Menlo")
+            chart.text( getPlanetInfo([planetNames[i]])).cx(pos3[0]).cy(pos3[1]).scale(1.5).rotate(angle * rad2deg ).fill("#0ff").font("Family", "Menlo")
         }
 
         if (drawOrbits) {
@@ -541,9 +540,13 @@ function createPlot() {
 
 
         /// Draw text infos
-        console.log()
-        chart.text( _Time.toString()).move(300,500).fill("#0ff").font("Family", "Menlo")
-        chart.text( "(lat, lon) = \t (" +  _Observer.latitude.toFixed(2) + " " + _Observer.longitude.toFixed(2) +") \t" + cityname).move(300,470).fill("#0ff").font("Family", "Menlo")
+        var lineHeight = 25
+        var y = 900
+        chart.text("Porphyry Houses, Elliptic Pole").move(300,y).fill("#0ff").font("Family", "Menlo")
+        y += lineHeight
+        chart.text( _Time.toString()).move(300,y).fill("#0ff").font("Family", "Menlo")
+        y += lineHeight
+        chart.text( "lat, lon = \t (" +  _Observer.latitude.toFixed(2) + " " + _Observer.longitude.toFixed(2) +") \t" + cityname).move(300,y).fill("#0ff").font("Family", "Menlo")
 
     });
 

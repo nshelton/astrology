@@ -14,11 +14,8 @@ function layoutPlanetLabels(positions, distance, c)  {
     // move to fixed radius
     let angles = {}
     for (var i = 0; i < planetNames.length; i ++) {
-        if ( radialProjection) {
-            angles[planetNames[i]] =  getAngle(positions[planetNames[i]], c)
-        } else {
-            angles[planetNames[i]] = positions[planetNames[i]][0]
-        }
+        angles[planetNames[i]] =  getAngle(positions[planetNames[i]], c)
+
     }
 
     for ( var k = 0; k < 10; k ++) {
@@ -37,16 +34,11 @@ function layoutPlanetLabels(positions, distance, c)  {
 
                 }
             }
-
         }
     }
 
     for (var i = 0; i < planetNames.length; i ++) {
-        if ( radialProjection) {
-            newPositions[planetNames[i]] = fromRadial(angles[planetNames[i]], distance, c)
-        } else {
-            newPositions[planetNames[i]] = [angles[planetNames[i]], 800];
-        }
+        newPositions[planetNames[i]] = fromRadial(angles[planetNames[i]], distance, c)
     }
 
     return newPositions
@@ -76,4 +68,38 @@ function layoutPlanetLabels(positions, distance, c)  {
                 }
             }
             return conj;
+        }
+
+        function createPorphyryHouses(asc_Point, mc_Point, dsc_Point, ic_Point, center) {
+            var a0 = getAngle(asc_Point, center)
+            var a1 = getAngle(mc_Point, center)
+            var a2 = getAngle(dsc_Point, center)
+            var a3 = getAngle(ic_Point, center)
+            markers = [a0, a1, a2, a3]
+            markers.sort(function(a,b) {
+                return (+a) - (+b);
+            });
+        
+            console.log(markers)
+            var houses = [
+                markers[0],
+                markers[0] * 0.666 + markers[1] * 0.333,
+                markers[0] * 0.333 + markers[1] * 0.666,
+                markers[1],
+                markers[1] * 0.666 + markers[2] * 0.333,
+                markers[1] * 0.333 + markers[2] * 0.666,
+                markers[2],
+                markers[2] * 0.666 + markers[3] * 0.333,
+                markers[2] * 0.333 + markers[3] * 0.666,
+                markers[3],
+                markers[3] * 0.666 + (markers[0] + Math.PI * 2) * 0.333,
+                markers[3] * 0.333 + (markers[0] + Math.PI * 2) * 0.666
+            ]
+        
+            var ACIndex = houses.indexOf(a0)
+        
+            // rotate so Asc is 0 
+            houses = houses.slice(ACIndex, houses.length).concat(houses.slice(0,ACIndex));
+        
+            return houses
         }

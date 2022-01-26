@@ -1,4 +1,19 @@
 
+function jitter(line, amount) {
+    return [
+        [line[0][0] + Math.random() * amount, line[0][1] + Math.random() * amount],
+        [line[1][0] + Math.random() * amount, line[1][1] + Math.random() * amount] ]
+}
+
+function trimLine(line, a) {
+    p0 = [ line[0][0] * a + line[1][0] * (1 - a), 
+            line[0][1] * a + line[1][1] * (1 - a)]
+    p1 = [ line[1][0] * a + line[0][0] * (1 - a), 
+            line[1][1] * a + line[0][1] * (1 - a)]
+    return [p0,p1]
+}
+
+
 function length(p) {
     return sqrt(p[0] * p[0] + p[1] * p[1])
 }
@@ -44,16 +59,10 @@ function fromRadial(theta, rad, c = center) {
 
 /////////////////////transforms
 
-
 function transform(hor) {
-    if ( radialProjection ) {
-
- 
-    } else {
-        return [
-            1000 * (hor.azimuth) / 200,
-            1000 * (hor.altitude + 90 )/180 ]
-    }
+    return [
+        1000 * (hor.azimuth) / 200,
+        1000 * (hor.altitude + 90 )/180 ]
 }
 
 function transformDegreesCelestialToEarth(p) {
@@ -68,9 +77,33 @@ function transformHourCelestialToEarth(p) {
     return transform(hor);
 }
 
+// function fransformEQJtoELI(horiz) {
+//     var horizVector =  Astronomy.VectorFromHorizon(horiz, _Time);
+//     var EQJ  = Astronomy.RotateVector(Rotation_HOR_EQJ, horizVector);
+//     var EQJ2000 = Astronomy.EquatorFromVector(EQJ, _Time, null)
+//     return fromCelestialHour(EQJ2000.ra, EQJ2000.dec)
+// }
 
+function EllipticFromCelestialHour(ra, dec) {
+    return EllipticFromCelestialLonLat(ra * 360/24, dec)
+}
+
+function EllipticFromCelestialLonLat(lon, lat) {
+    //spherical takes lat lon
+    const lonlat = new Astronomy.Spherical(lat, lon, 100.0);                 
+    var sph =  Astronomy.VectorFromSphere(lonlat, _Time);
+    var ECLvec  = Astronomy.RotateVector(Rotation_EQJ_ECL, sph);
+    var ECL2000 = Astronomy.EquatorFromVector(ECLvec)
+    return fromCelestialHour(ECL2000.ra, ECL2000.dec)
+}
+
+let polar = true
 function fromCelestialLonLat(lon, lat) {
-    if (radialProjection) {
+    // wrap
+    if ( lon> 180) 
+        lon -= 360
+
+    if(polar) {
         var lambda = lon * deg2rad ;
         var phi = lat * deg2rad ;
     
@@ -78,12 +111,13 @@ function fromCelestialLonLat(lon, lat) {
         var theta = lambda;
     
         return [
-             scale * rho * cos (theta) + center[0] ,
+            scale * rho * cos (theta) + center[0] ,
             -scale * rho * sin (theta) + center[1] ]
     } else {
         return [
-            1000 * (lon + 180) / 180,
-            1000 * (lat + 90 ) /180 ]
+            10 * scale * lon/360 + center[0],
+            5 * scale * lat/180 + center[1]]
+
     }
 }
 
@@ -104,6 +138,5 @@ function getColor(body) {
         'Neptune' : "#00f",
         'Pluto': "#bbb",
     }
-
     return colors[body]
 }
