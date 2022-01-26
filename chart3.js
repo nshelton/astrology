@@ -19,7 +19,7 @@ _Time = new Date('April 10, 1991 23:05:00 CDT')
 // _Time = new Date('December 23, 2014 16:20:00 GMT')
 // _Time = new Date();
 // _Time = new Date('September 19, 1990 07:47:00 PST')
-// _Time = new Date('October 22, 1986 17:10:00 PST')
+// _Time = new Date('October 22, 1987 05:10:00 MDT')
 // _Time.setMonth( Math.round(Math.random() * 11) )
 // _Time.setDate(Math.floor(Math.random() * 30))
 // _Time.setHours(Math.floor(Math.random() * 24))
@@ -32,10 +32,12 @@ _Time = new Date('April 10, 1991 23:05:00 CDT')
 // _Time.setHours(_Time.getHours() + 6)
 cityname = "dallas"
 _Observer = new Astronomy.Observer(33.014996366375, -96.67997803873509, 0); // dallas
-// _Time.setHours(_Time.getHours() + 5)
 
 // cityname = "washington, DC"
 // _Observer = new Astronomy.Observer(38.9240400110907, -77.00558584122027, 0); // dallas
+
+// cityname = "roswell"
+// _Observer = new Astronomy.Observer(33.40416482155773, -104.53147490972424, 0); // dallas
 
 // cityname = "paris"
 // _Observer = new Astronomy.Observer(48.862420104011264, 2.356997754939505, 0); 
@@ -55,8 +57,7 @@ let drawStars = true;
 let drawOrbits = true;
 let drawConjunctions = true;
 
-let maxMag = 4
-
+let maxMag = 5
 let eclipticRadius = 620/2
 
 function DrawArrow(chart, point, length, rad, arrowWidth) {
@@ -189,7 +190,8 @@ function createPlot() {
         for (let i = 0; i < 12; i++) {
             basicAngles.push(-(i/12) * 2 * Math.PI -  Math.PI/12)       
         }
-        printRing(chart, symbols, basicAngles, 350, 25, "#f0f", 1)
+
+        printRing(chart, symbols, basicAngles, 325, 50, "#f0f", 1)
 
         var planetLocations = {}
         var planetColor = "#f00"
@@ -217,11 +219,17 @@ function createPlot() {
             var pos3 = setDistance(location, getDistance(location) + 70);
             var angle = getAngle(location)
 
-            planetLocation = setDistance(planetLocation, getDistance(planetLocation) + 30)
-            chart.line(lineDst[0], lineDst[1], planetLocation[0], planetLocation[1]).stroke(planetColor)
+            outerPlanet = setDistance(planetLocation, getDistance(planetLocation) + 30)
+            chart.line(lineDst[0], lineDst[1], outerPlanet[0], outerPlanet[1]).stroke(planetColor)
+
+
+            inner0 = setDistance(planetLocation, getDistance(planetLocation) - 30)
+            inner1 = setDistance(planetLocation, 210)
+            chart.line(inner0[0], inner0[1], inner1[0], inner1[1]).stroke(planetColor)
+
 
             chart.text(planetSymbols[i]).cx(location[0]).cy(location[1]).scale(4).rotate(angle * rad2deg - 90 ).fill("none").stroke({ color: planetColor, width: 0.3}) 
-            chart.text( getPlanetInfo([planetNames[i]])).cx(pos3[0]).cy(pos3[1]).scale(1.5).rotate(angle * rad2deg ).fill("#0ff").font("Family", "Menlo")
+            chart.text( getPlanetInfo([planetNames[i]])).cx(pos3[0]).cy(pos3[1]).scale(1).rotate(angle * rad2deg ).fill("#ddd").font("Family", "Menlo")
         }
         
         if (drawOrbits) {
@@ -234,7 +242,7 @@ function createPlot() {
                    let equ_ofdate = Astronomy.Equator(body, newDate, _Observer, true, true);
                     coord = EllipticFromCelestialHour(equ_ofdate.ra, equ_ofdate.dec)
                     if (i > 0)
-                        chart.line(lastpos[0], lastpos[1], coord[0], coord[1]).stroke(getColor(body)).fill("none").scale(1)
+                        chart.line(lastpos[0], lastpos[1], coord[0], coord[1]).stroke(getColor(body)).fill("none")
                     lastpos = coord
                 }
             }
@@ -296,7 +304,8 @@ function createPlot() {
         DrawArrow(chart, accPos, 100, outerRadius + 25, 0.02)
 
         p = setDistance(accPos, outerRadius)
-        chart.line(p[0], p[1], center[0], center[1]).stroke("#f00").fill("none") 
+        p2 = setDistance(p, 185)
+        chart.line(p[0], p[1], p2[0], p2[1]).stroke("#f00").fill("none") 
 
         // /--------------------------------------------Descendant
         var WText = setDistance(decPos, outerRadius + textOffset)
@@ -304,20 +313,20 @@ function createPlot() {
         chart.text( "DC").cx(WText[0]).cy(WText[1]).fill("#f00").rotate(angle * rad2deg + 90).font("Family", "Menlo").font("size", 35)
         
         p = setDistance(decPos, outerRadius)
-        chart.line(p[0], p[1], center[0], center[1]).stroke("#f00").fill("none") 
+        p2 = setDistance(p, 185)
+        chart.line(p[0], p[1], p2[0], p2[1]).stroke("#f00").fill("none") 
 
         DrawArrow(chart, decPos, 100, outerRadius + 25, 0.02)
 
         // /--------------------------------------------MC
         var mcPoint = fromRadial(MCangle, outerRadius)
-
-
         var SText = setDistance(mcPoint, outerRadius + textOffset)
         var angle = getAngle(SText, eclipticCenter)
         chart.text( "MC").cx(SText[0]).cy(SText[1]).fill("#f00").rotate(angle * rad2deg + 90 ).font("Family", "Menlo").font("size", 35)
 
         p = setDistance(mcPoint, outerRadius)
-        chart.line(p[0], p[1], center[0], center[1]).stroke("#f00").fill("none") 
+        p2 = setDistance(p, 185)
+        chart.line(p[0], p[1], p2[0], p2[1]).stroke("#f00").fill("none") 
 
         DrawArrow(chart, mcPoint, 100, outerRadius + 25, 0.02)
 
@@ -330,8 +339,8 @@ function createPlot() {
         chart.text( "IC").cx(NText[0]).cy(NText[1]).fill("#f00").rotate(angle * rad2deg + 90).font("Family", "Menlo").font("size", 35)
 
         p = setDistance(icPoint, outerRadius)
-        chart.line(p[0], p[1], center[0], center[1]).stroke("#f00").fill("none") 
-
+        p2 = setDistance(p, 185)
+        chart.line(p[0], p[1], p2[0], p2[1]).stroke("#f00").fill("none") 
 
         DrawArrow(chart, icPoint, 100, outerRadius + 25, 0.02)
 
@@ -356,14 +365,14 @@ function createPlot() {
             pos0 = fromRadial(thetaTick, outerRadius - 25)
             pos1 = fromRadial(thetaTick, outerRadius - 75 )
 
-            var textString = ra.toFixed(0) + " : " + getHouseInfo(ra);
+            var textString = ra.toFixed(0) + " | " + getHouseInfo2(ra);
 
             thetaText = housePositions[x] + 0.01 * textString.length
             label = fromRadial(thetaText, outerRadius - 50)
 
 
             chart.line(pos0[0], pos0[1], pos1[0], pos1[1]).stroke('#aaa').fill("none")
-            chart.text(textString).cx(label[0]).cy(label[1]).scale(1).rotate(thetaText * rad2deg + 90).fill("#aaa").font("Family", "Menlo")
+            chart.text(textString).cx(label[0]).cy(label[1]).rotate(thetaText * rad2deg + 90).fill("#ddd").font("Family", "Menlo")
         }
 
         chart.circle(2 * (outerRadius - 75)).cx(center[0]).cy(center[1]).stroke("#aaa").fill("none")
@@ -390,7 +399,7 @@ function createPlot() {
         var lineHeight = 25
         var y = 1600
         y -= lineHeight
-        chart.text("Porphyry Houses, Elliptic Pole").move(300,y).fill("#0ff").font("Family", "Menlo")
+        chart.text("Porphyry Houses | Elliptic Pole").move(300,y).fill("#0ff").font("Family", "Menlo")
         y -= lineHeight
         chart.text( _Time.toString()).move(300,y).fill("#0ff").font("Family", "Menlo")
         y -= lineHeight

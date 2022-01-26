@@ -54,7 +54,6 @@ function fromRadial(theta, rad, c = center) {
     result[0] = rad * cos(theta) + c[0];
     result[1] = rad * sin(theta) + c[1];
     return result;
-
 }
 
 /////////////////////transforms
