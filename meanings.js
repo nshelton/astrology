@@ -18,18 +18,18 @@ function getHouseInfo(i) {
 
 function getHouseInfo2(i) {
     var houses =  {
-        1 : "Self",
-        2 : "Gain",
-        3 : "Order",
-        4 : "Parent",
-        5 : "Children",
-        6 : "Health",
-        7 : "Partner",
-        8 : "Death",
-        9 : "Purpose",
-        10 : "Kingdom",
-        11 : "Support",
-        12 : "Unconscious",
+        1 : "self",
+        2 : "gain",
+        3 : "order",
+        4 : "parent",
+        5 : "children",
+        6 : "health",
+        7 : "partner",
+        8 : "death",
+        9 : "purpose",
+        10 : "kingdom",
+        11 : "support",
+        12 : "unconscious",
     }
     return houses[i]
 }
@@ -54,17 +54,17 @@ function getPlanetInfo(name) {
 function getZodiacInfo(i) {
     var zodiac =  {
         1 : "brave",
-        2 : "fierce",
-        3 : "curious",
+        2 : "drive",
+        3 : "communication",
         4 : "nurturing",
-        5 : "confident",
-        6 : "healer",
+        5 : "brave",
+        6 : "helper",
         7 : "fair",
-        8 : "mysterious",
-        9 : "intelligent",
-        10 : "driven",
-        11 : "community",
-        12 : "dreamy ",
+        8 : "passion",
+        9 : "ambition",
+        10 : "drive",
+        11 : "eccentric",
+        12 : "intuitive",
     }
     return zodiac[i]
 }

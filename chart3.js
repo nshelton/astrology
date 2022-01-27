@@ -25,10 +25,10 @@ _Time = new Date('Aug 24, 1989 2:10:00 PDT') //reza
 // _Time = new Date();
 // _Time = new Date('September 19, 1990 07:47:00 PST')
 // _Time = new Date('October 22, 1987 05:10:00 MDT')
-// _Time.setMonth( Math.round(Math.random() * 11) )
-// _Time.setDate(Math.floor(Math.random() * 30))
-// _Time.setHours(Math.floor(Math.random() * 24))
-// _Time.setFullYear(Math.floor(Math.random() *40 + 1980))
+_Time.setMonth( Math.round(Math.random() * 11) )
+_Time.setDate(Math.floor(Math.random() * 30))
+_Time.setHours(Math.floor(Math.random() * 24))
+_Time.setFullYear(Math.floor(Math.random() *40 + 1980))
 
 // const _Observer = new Astronomy.Observer(90, 0, 0);
 // _Observer = new Astronomy.Observer(90, 0, 0);
@@ -122,14 +122,81 @@ function bisectAngles(angles) {
     return centers
 }
 
+
 function printText(chart, str, x, y) {
-    var width = 20
+    var width = 15
+    var orig = [x,y]
     for(var i = 0; i < str.length; i++) {
-        var p = fontGlyphs[str[i]][1]
-        chart.path(p).cx(x).cy(y).scale(0.01).fill("none").stroke({color:"#fff", width:100})
-        x += width
+        var p = fontGlyphs[str[i]]
+        var yoff = getGlyphOffset(str[i]) 
+        if ( p != null) {
+            chart.path(p).move(x, y + yoff).stroke("#fff").fill("none")
+        }
+
+        x += getGlyphWidth(str[i])
+    }
+
+    chart.line(orig[0], orig[1]+ 20, x, y+ 20 ).stroke("#fff").fill("none")
+
+}
+
+
+function printTextAngle(chart, str, x, y ) {
+    var angle = getAngle([x,y])
+    var rad = getDistance([x,y])
+
+    for(var i = 0; i < str.length; i++) {
+        var pathData = fontGlyphs[str[i]]
+
+        if ( pathData == null) {
+            rad += 20
+            continue;
+        }
+
+        var yoff = GetHeightOffset(str[i])
+        var angleOffset = yoff * 0.000001 * rad;
+        var pathstring = ""
+        rad += getGlyphWidth(str[i])/2
+        var pos =  fromRadial(angle + angleOffset, rad) 
+
+        for(var j =0; j < pathData.length; j+=3) {
+            pathstring += pathData[j] + " " +  pathData[j+1] + " " + (pathData[j+2]).toFixed(0) + " "
+        }
+        chart.path(pathstring).cx(pos[0]).cy(pos[1]).stroke("#0f0").fill("none").rotate(angle *  rad2deg)
+        rad += getGlyphWidth(str[i])/2
     }
 }
+
+
+function printTextRadial(chart, str, rad, theta ) {
+    var angle = theta
+    var scale = 0.6
+
+    for(var i = 0; i < str.length; i++) {
+        var pathData = fontGlyphs[str[i]]
+
+        if ( pathData == null) {
+            angle += 0.01
+            continue;
+        }
+
+        var rOff = scale * GetRadiusOffset(str[i])
+        var pathstring = ""
+        var angleScale = scale /rad
+        angle += angleScale * getGlyphWidth(str[i])/2
+
+        var pos = fromRadial(angle, rad + rOff) 
+
+        for(var j =0; j < pathData.length; j+=3) {
+            pathstring += pathData[j] + " " +  pathData[j+1] + " " + (pathData[j+2])+ " "
+        }
+
+        chart.path(pathstring).cx(pos[0]).cy(pos[1]).stroke("#0f0").fill("none").rotate(angle * rad2deg + 90).scale(scale)
+        angle += angleScale * getGlyphWidth(str[i])/2
+    }
+}
+
+
 
 function printRing(chart, names, angles, radius, length, color, textsize) {
     chart.circle(radius).cx(center[0]).cy(center[1]).stroke(color).fill("none")
@@ -195,9 +262,9 @@ function createPlot() {
     // for (var i = 0; i < 2; i ++) {
     //     chart.circle(i* 300 + 20).cx(center[0]).cy(center[1]).stroke('#aaa').fill("none")
     // }
-
-
-    printText(chart, "t|esting ", 400, 400)
+    // testing 
+    // printTextRadial(chart, "abcdefghijklmnopqrstuvwxyz1234567890", 650,  - 2);
+    // chart.circle(650*2).cx(center[0]).cy(center[1]).stroke('#aaa').fill("none")
 
 
     $.getJSON("./constellations.lines.json", function(json) {
@@ -238,6 +305,23 @@ function createPlot() {
 
         printGlyphRing(chart, basicAngles, 325, 50, "#f0f", 1)
 
+        // ------------- zodiac description  --------------------------
+        
+        chart.circle(400).cx(center[0]).cy(center[1]).stroke(STAR_COLOR).fill("none")
+        chart.circle(400 + 100).cx(center[0]).cy(center[1]).stroke(STAR_COLOR).fill("none")
+    
+        for (let i = 0; i < zodiacAngles.length; i++) {
+            const angle = zodiacAngles[i];
+    
+            // var p0 = fromRadial(angle , radius/2 + length/2)
+            // chart.text(names[i]).cx(p0[0]).cy(p0[1]).scale(textsize).rotate(angle * rad2deg + 90 ).fill("none").stroke({ color: color, width: 0.3}) 
+            // chart.path(zodiacGlyph[i]).cx(p0[0]).cy(p0[1]).scale(textsize*2).rotate(angle * rad2deg + 90 ).fill("none").stroke({ color: color, width: 0.3}) 
+            var textString = getZodiacInfo(i+1)
+            printTextRadial(chart, textString, 420, angle+ 0.05)
+        }
+    
+
+        // ------------- PLANETS --------------------------
         var planetLocations = {}
 
         for (let body of planetNames) {
@@ -277,7 +361,10 @@ function createPlot() {
 
             chart.path(planetGlyph[i]).cx(location[0]).cy(location[1]).scale(8).rotate(angle * rad2deg - 90 ).fill("none").stroke({ color: PLANET_COLOR, width: 0.3}) 
 
-            chart.text( getPlanetInfo([planetNames[i]])).cx(pos3[0]).cy(pos3[1]).scale(1).rotate(angle * rad2deg ).fill(TEXT_COLOR)
+            // chart.text( getPlanetInfo([planetNames[i]])).cx().cy(pos3[1]).scale(1).rotate(angle * rad2deg ).fill(TEXT_COLOR)
+
+            printTextAngle(chart, getPlanetInfo([planetNames[i]]), pos3[0], pos3[1])
+
         }
         
         if (drawOrbits) {
@@ -442,14 +529,15 @@ function createPlot() {
                 chart.line(q0[0], q0[1], q1[0], q1[1]).stroke('#aaa').fill("none")
             }
 
-            var textString = ra.toFixed(0) + " | " + getHouseInfo2(ra);
+            var textString = " " + ra.toFixed(0) + " " + getHouseInfo2(ra);
 
-            thetaText = housePositions[x] + 0.01 * textString.length
+            thetaText = housePositions[x] 
             label = fromRadial(thetaText, outerRadius - 50)
 
 
             chart.line(pos0[0], pos0[1], pos1[0], pos1[1]).stroke(TEXT_COLOR).fill("none")
-            chart.text(textString).cx(label[0]).cy(label[1]).rotate(thetaText * rad2deg + 90).fill(TEXT_COLOR)
+            // chart.text(textString).cx(label[0]).cy(label[1]).rotate(thetaText * rad2deg + 90).fill(TEXT_COLOR)
+            printTextRadial(chart, textString,  outerRadius - 65, thetaText)
         }
 
         chart.circle(2 * (outerRadius - 75)).cx(center[0]).cy(center[1]).stroke(TEXT_COLOR).fill("none")
