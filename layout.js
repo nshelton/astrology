@@ -193,6 +193,16 @@ function drawPlanet(chart, coord, col) {
     chart.circle(60).cx(coord[0]).cy(coord[1]).stroke(col).fill("none")
 }
 
+function containsPair(arr, a, b) {
+    for (let i = 0; i < arr.length; i++) {
+        const element = arr[i];
+        if ((element[0] == a && element[1] == b ) || 
+            (element[1] == a && element[0] == b ))
+                return true;
+    }
+    return false;
+}
+
 
 function findAspects(positions, thresh, target)  {
     conj = []
@@ -212,10 +222,12 @@ function findAspects(positions, thresh, target)  {
             var mina = Math.min(a0, a1)
             var maxa = Math.max(a0, a1)
             if(i != j && abs((maxa - mina) - target)  < thresh) {
-                conj.push([planetNames[i], planetNames[j]]) 
+                if ( !containsPair(conj, planetNames[i], planetNames[j]))
+                    conj.push([planetNames[i], planetNames[j]]) 
             }
         }
     }
+
     return conj;
 }
 
@@ -270,7 +282,8 @@ function drawAspectSymbol(chart, type, x,y) {
 }       
 
 function drawAspectLines(chart, aspects, planetLocations) {
-
+    if (aspects == null) 
+        return
     var offs = 0;
     for (var i = 0; i < aspects.length; i ++) {
         line = [planetLocations[aspects[i][0]], planetLocations[aspects[i][1]]]
@@ -281,10 +294,49 @@ function drawAspectLines(chart, aspects, planetLocations) {
 }
 var lineHeight = 35
 
+function getHouse(planetAngle, houseAngles) {
+    console.log(planetAngle)
+    console.log(houseAngles)
+
+    for (let i = 0; i < houseAngles.length; i++) {
+        var housenum = 12 - i 
+
+        
+        var a0 = houseAngles[i];
+        var a1 = houseAngles[(i + 1) %12];
+
+        while(a0 < 0 || a1 < 0 || planetAngle < 0) {
+            a1 += Math.PI*2
+            a0 += Math.PI*2
+            planetAngle += Math.PI*2
+        }
+
+        var mina = Math.min(a0, a1)
+        var maxa = Math.max(a0, a1)
+        
+        if (maxa - mina > Math.PI ) {
+            mina += Math.PI * 2
+        }
+
+        if ( planetAngle > mina && planetAngle < maxa) {
+            let deg = 30 * (   (planetAngle - mina) / (maxa - mina))
+            return [housenum,  deg];
+        }
+    }
+
+    return [-1, -1]
+}
+
+
 function drawAspectTable(chart, aspects, type, y, x){
     /// Draw text infos
+
+    if (aspects == null) 
+    return y
+
     var currentx = x
-    y += lineHeight
+    if (aspects.length > 0)
+     y += lineHeight
     
     for( var i =0; i < aspects.length; i++) {
         var currentx = x
@@ -318,7 +370,7 @@ function doAllAspects(chart, planetLocations) {
     var trines = findAspects(planetLocations, deg2rad * 7.5, deg2rad * 120)
     drawAspectLines(chart, trines, planetLocations)
     y = drawAspectTable(chart, trines, "tri", y, x)
-
+    if ( y > 1000)
     var squares = findAspects(planetLocations, deg2rad * 7.5, deg2rad * 90)
     drawAspectLines(chart, squares, planetLocations)
     y = drawAspectTable(chart, squares, "squ", y, x)

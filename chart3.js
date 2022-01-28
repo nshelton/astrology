@@ -13,22 +13,23 @@ deg2rad =  0.01745329252;
 rad2deg = 1/deg2rad;
 
 
-_Time = new Date('Aug 24, 1989 2:10:00 PDT') //reza
+// _Time = new Date('Aug 24, 1989 2:10:00 PDT') //reza
 
 
-var _Time = new Date('June 11, 1989 23:05:00')
+// var _Time = new Date('June 11, 1989 23:05:00')
 // _Time = new Date('June 21, 1959 23:05:00')
 // _Time = new Date('April 10, 1991 23:05:00 CDT')
 // _Time = new Date('Feb 22, 1986 7:00:00 EST')
 // _Time = new Date('Dec 2, 1987 05:00:00 EST')
-// _Time = new Date('December 23, 2014 16:20:00 GMT')
+// _Time = new Date('December 23, 2014 16:20:00 GMT'    )
 // _Time = new Date();
 // _Time = new Date('September 19, 1990 07:47:00 PST')
-// _Time = new Date('October 22, 1987 05:10:00 MDT')
-_Time.setMonth( Math.round(Math.random() * 11) )
-_Time.setDate(Math.floor(Math.random() * 30))
-_Time.setHours(Math.floor(Math.random() * 24))
-_Time.setFullYear(Math.floor(Math.random() *40 + 1980))
+_Time = new Date('October 22, 1987 05:10:00 MDT')
+_Time = new Date('May, 27 1995 09:33:00 EDT')
+// _Time.setMonth( Math.round(Math.random() * 11) )
+// _Time.setDate(Math.floor(Math.random() * 30))
+// _Time.setHours(Math.floor(Math.random() * 24))
+// _Time.setFullYear(Math.floor(Math.random() *40 + 1980))
 
 // const _Observer = new Astronomy.Observer(90, 0, 0);
 // _Observer = new Astronomy.Observer(90, 0, 0);
@@ -54,6 +55,10 @@ _Time.setFullYear(Math.floor(Math.random() *40 + 1980))
 cityname = "roswell"
 _Observer = new Astronomy.Observer(33.40416482155773, -104.53147490972424, 0); // dallas
 
+cityname = "mt kisco, NY"
+_Observer = new Astronomy.Observer(41.20114658395757, -73.72850309013931, 0); // kurt ny
+
+
 // cityname = "paris"
 // _Observer = new Astronomy.Observer(48.862420104011264, 2.356997754939505, 0); 
 // _Time.setHours(_Time.getHours() + 1)
@@ -71,6 +76,7 @@ let drawraditionalHouses = false
 let drawStars = true;
 let drawOrbits = true;
 let drawAspects = true;
+let drawHouseTable= false; /// this has some math bugs 
 
 let maxMag = 5
 let eclipticRadius = 620/2
@@ -275,7 +281,6 @@ function createPlot() {
 
         var MCangle = getAngle(directlyUp, northpole);
 
-
         northpole = EllipticFromCelestialLonLat(0, 90)
         N = EllipticFromCelestialLonLat(90, 85)
         E = EllipticFromCelestialLonLat(0, 85)
@@ -314,11 +319,11 @@ function createPlot() {
 
         DrawArrow(chart, icPoint, 300, outerRadius + 25, 0.07)
 
-        var housePositions = createPorphyryHouses(accPos, mcPoint, decPos, icPoint, center)
+        var houseAngles = createPorphyryHouses(accPos, mcPoint, decPos, icPoint, center)
         var houseLabels = []
-        for ( var i = 0 ; i < housePositions.length; i ++) {
-            var a0 = housePositions[i];
-            var a1 = housePositions[(i + 1) %12];
+        for ( var i = 0 ; i < houseAngles.length; i ++) {
+            var a0 = houseAngles[i];
+            var a1 = houseAngles[(i + 1) %12];
             var mina = Math.min(a0, a1)
             var maxa = Math.max(a0, a1)
             if (maxa - mina > Math.PI ) {
@@ -331,12 +336,12 @@ function createPlot() {
         for(var x = 0; x < 12; x ++) {
             var ra = 12 - x 
 
-            thetaTick = housePositions[x]
+            thetaTick = houseAngles[x]
             pos0 = fromRadial(thetaTick, outerRadius - 25)
             pos1 = fromRadial(thetaTick, outerRadius - 75 )
 
-            var a0 = housePositions[x];
-            var a1 = housePositions[(x + 1) %12];
+            var a0 = houseAngles[x];
+            var a1 = houseAngles[(x + 1) %12];
             var mina = Math.min(a0, a1)
             var maxa = Math.max(a0, a1)
             if (maxa - mina > Math.PI ) {
@@ -360,7 +365,7 @@ function createPlot() {
 
             var textString = " " + ra.toFixed(0) + " " + getHouseInfo2(ra);
 
-            thetaText = housePositions[x] 
+            thetaText = houseAngles[x] 
             label = fromRadial(thetaText, outerRadius - 50)
 
 
@@ -374,6 +379,23 @@ function createPlot() {
         if ( drawAspects) {
 
             doAllAspects(chart, planetLocations)
+        }
+
+        if ( drawHouseTable) {
+            var x = 1700
+            var y = 400
+
+            printText(chart, "houses", x, y)
+            y += 35
+
+            for (let body of planetNames) {
+                y += 45
+                chart.path(planetGlyph[planetNames.indexOf(body)]).move(x,y).fill("none").stroke({ color: PLANET_COLOR, width:0.3}).scale(3);
+                var angle = getAngle(planetLocations[body])
+                var houseDeg = getHouse(angle, houseAngles)
+                printText(chart, houseDeg[0].toFixed(0), x + 40, y-5)
+                printText(chart, houseDeg[1].toFixed(0), x + 90, y-5)
+            }
         }
           
         if ( drawStars) {
