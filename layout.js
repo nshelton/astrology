@@ -43,21 +43,181 @@ function layoutPlanetLabels(positions, distance, c)  {
     return newPositions
 }
 
-function findConjunctions(positions, thresh, target, c)  {
+function bisectAngles(angles) {
+
+    var centers = []
+    for ( var i = 0 ; i < angles.length; i ++) {
+        var a0 = angles[i];
+        var a1 = angles[(i + 1) %12];
+        var mina = Math.min(a0, a1)
+        var maxa = Math.max(a0, a1)
+        if (maxa - mina > Math.PI ) {
+            mina += Math.PI * 2
+        }
+        centers.push((mina + maxa)/2)
+    }
+    return centers
+}
+
+
+function printText(chart, str, x, y) {
+    var width = 15
+    var orig = [x,y]
+    for(var i = 0; i < str.length; i++) {
+        var p = fontGlyphs[str[i]]
+        var yoff = getGlyphOffset(str[i]) 
+        if ( p != null) {
+            chart.path(p).move(x, y + yoff).stroke("#fff").fill("none")
+        }
+
+        x += getGlyphWidth(str[i])
+    }
+
+    chart.line(orig[0], orig[1]+ 20, x, y+ 20 ).stroke("#fff").fill("none")
+
+}
+
+
+function printTextAngle(chart, str, x, y ) {
+    var angle = getAngle([x,y])
+    var rad = getDistance([x,y])
+
+    for(var i = 0; i < str.length; i++) {
+        var pathData = fontGlyphs[str[i]]
+
+        if ( pathData == null) {
+            rad += 20
+            continue;
+        }
+
+        var yoff = GetHeightOffset(str[i])
+        var angleOffset = yoff * 0.000001 * rad;
+        var pathstring = ""
+        rad += getGlyphWidth(str[i])/2
+        var pos =  fromRadial(angle + angleOffset, rad) 
+
+        for(var j =0; j < pathData.length; j+=3) {
+            pathstring += pathData[j] + " " +  pathData[j+1] + " " + (pathData[j+2]).toFixed(0) + " "
+        }
+        chart.path(pathstring).cx(pos[0]).cy(pos[1]).stroke("#0f0").fill("none").rotate(angle *  rad2deg)
+        rad += getGlyphWidth(str[i])/2
+    }
+}
+
+
+function printTextRadial(chart, str, rad, theta ) {
+    var angle = theta
+    var scale = 0.6
+
+    for(var i = 0; i < str.length; i++) {
+        var pathData = fontGlyphs[str[i]]
+
+        if ( pathData == null) {
+            angle += 0.01
+            continue;
+        }
+
+        var rOff = scale * GetRadiusOffset(str[i])
+        var pathstring = ""
+        var angleScale = scale /rad
+        angle += angleScale * getGlyphWidth(str[i])/2
+
+        var pos = fromRadial(angle, rad + rOff) 
+
+        for(var j =0; j < pathData.length; j+=3) {
+            pathstring += pathData[j] + " " +  pathData[j+1] + " " + (pathData[j+2])+ " "
+        }
+
+        chart.path(pathstring).cx(pos[0]).cy(pos[1]).stroke("#0f0").fill("none").rotate(angle * rad2deg + 90).scale(scale)
+        angle += angleScale * getGlyphWidth(str[i])/2
+    }
+}
+
+function drawLineFromPoints(chart, points, color) {
+    lastPoint = points[0]
+    for (var i = 1; i < points.length; i ++) {
+        var point = points[i]
+        chart.line(lastPoint[0], lastPoint[1], point[0], point[1]).stroke(color)
+        lastPoint = point
+    }
+}
+
+
+function printRing(chart, names, angles, radius, length, color, textsize) {
+    chart.circle(radius).cx(center[0]).cy(center[1]).stroke(color).fill("none")
+    chart.circle(radius + length*2).cx(center[0]).cy(center[1]).stroke(color).fill("none")
+
+    var centers = bisectAngles(angles);
+
+    for (let i = 0; i < angles.length; i++) {
+        const angle = angles[i];
+
+        var p0 = fromRadial(angle , radius/2 + length/2)
+        chart.text(names[i]).cx(p0[0]).cy(p0[1]).scale(textsize).rotate(angle * rad2deg + 90 ).fill("none").stroke({ color: color, width: 0.3}) 
+    }
+
+    for (let i = 0; i < centers.length; i++) {
+        const angle = centers[i];
+
+        var p0 = fromRadial(angle, radius/2)
+        var p1 = fromRadial(angle, radius/2 + length)
+
+        chart.line(p0[0], p0[1], p1[0], p1[1]).stroke(color)
+
+    }
+}
+
+
+function printGlyphRing(chart, angles, radius, length, color, textsize) {
+    chart.circle(radius).cx(center[0]).cy(center[1]).stroke(color).fill("none")
+    chart.circle(radius + length*2).cx(center[0]).cy(center[1]).stroke(color).fill("none")
+
+    var centers = bisectAngles(angles);
+
+    for (let i = 0; i < angles.length; i++) {
+        const angle = angles[i];
+
+        var p0 = fromRadial(angle , radius/2 + length/2)
+        // chart.text(names[i]).cx(p0[0]).cy(p0[1]).scale(textsize).rotate(angle * rad2deg + 90 ).fill("none").stroke({ color: color, width: 0.3}) 
+        chart.path(zodiacGlyph[i]).cx(p0[0]).cy(p0[1]).scale(textsize*2).rotate(angle * rad2deg + 90 ).fill("none").stroke({ color: color, width: 0.3}) 
+    }
+
+    for (let i = 0; i < centers.length; i++) {
+        const angle = centers[i];
+
+        var p0 = fromRadial(angle, radius/2)
+        var p1 = fromRadial(angle, radius/2 + length)
+
+        chart.line(p0[0], p0[1], p1[0], p1[1]).stroke(color)
+
+    }
+}
+function drawPlanet(chart, coord, col) {
+    chart.circle(1).cx(coord[0]).cy(coord[1]).stroke(col).fill('none')
+    chart.circle(10).cx(coord[0]).cy(coord[1]).stroke(col).fill('none')
+    chart.circle(50).cx(coord[0]).cy(coord[1]).stroke(col).fill("none")
+    chart.circle(60).cx(coord[0]).cy(coord[1]).stroke(col).fill("none")
+}
+
+
+function findAspects(positions, thresh, target)  {
     conj = []
 
     // move to fixed radius
     let angles = {}
     for (var i = 0; i < planetNames.length; i ++) {
-        angles[planetNames[i]] =  getAngle(positions[planetNames[i]], c)
+        angles[planetNames[i]] =  getAngle(positions[planetNames[i]])
         if ( angles[planetNames[i]] < 0 )
             angles[planetNames[i]] += Math.PI * 2
     }
     
     for (var i = 0; i < planetNames.length; i ++) {
         for (var j = 0; j < planetNames.length; j ++) {
-
-            if(i != j && abs(angles[planetNames[i]] - angles[planetNames[j]] - target)  < thresh) {
+            var a0 = angles[planetNames[i]];
+            var a1 = angles[planetNames[j]]
+            var mina = Math.min(a0, a1)
+            var maxa = Math.max(a0, a1)
+            if(i != j && abs((maxa - mina) - target)  < thresh) {
                 conj.push([planetNames[i], planetNames[j]]) 
             }
         }
@@ -91,9 +251,94 @@ function createPorphyryHouses(asc_Point, mc_Point, dsc_Point, ic_Point, center) 
     ]
 
     var ACIndex = houses.indexOf(a0)
-
     // rotate so Asc is 0 
     houses = houses.slice(ACIndex, houses.length).concat(houses.slice(0,ACIndex));
 
     return houses
+}
+       
+function drawAspectSymbol(chart, type, x,y) {
+    let scale = 20
+    if ( type =="opp") {
+        chart.line(x,y+scale, x+scale, y).stroke("#0ff");
+        chart.circle(scale / 3).cx(x).cy(y+scale).stroke("#0ff");
+        chart.circle(scale / 3).cx(x+scale).cy(y).stroke("#0ff"); 
+    } else if ( type =="con") {
+        chart.line(x,y, x+scale, y+scale).stroke("#0ff");
+        chart.circle(scale / 3).cx(x).cy(y).stroke("#0ff");
+    } else if ( type =="squ") {
+        chart.rect(scale, scale).cx(x).cy(y).stroke("#0ff");
+    } else if ( type =="tri") {
+        chart.path("M 8.66 0 L 17.3 15 L 0 15 L 8.66 0").cx(x).cy(y).stroke("#0ff").fill("none");
+
+    } else if ( type =="sex") {
+
+        chart.path("M 8.66 0 L 8.66 20 M 17.3 5 L 0 15 M 17.3 15 L 0 5 Z").cx(x).cy(y).stroke("#0ff").fill("none");
+    }
+
+}       
+
+
+
+function drawAspectLines(chart, aspects, planetLocations) {
+
+    var offs = 0;
+    for (var i = 0; i < aspects.length; i ++) {
+        line = [planetLocations[aspects[i][0]], planetLocations[aspects[i][1]]]
+        console.log(line)
+        var l = trimLine(line, 0.9)
+        chart.line(l[0][0] + offs, l[0][1] + offs, l[1][0] + offs, l[1][1]+offs).stroke({ color: '#ff0'})                 
+    }
+}
+var lineHeight = 35
+
+function drawAspectTable(chart, aspects, type, y, x){
+    /// Draw text infos
+    var currentx = x
+    y += lineHeight
+
+
+    
+    for( var i =0; i < aspects.length; i++) {
+        var currentx = x
+
+        y += lineHeight
+        drawAspectSymbol(chart, type, currentx,y); 
+        currentx += 40
+        chart.path(planetGlyph[planetNames.indexOf(aspects[i][0])]).move(currentx,y).fill("none").stroke({ color: PLANET_COLOR, width: 0.3}).scale(3);
+        currentx += 30
+        chart.path(planetGlyph[planetNames.indexOf(aspects[i][1])]).move(currentx,y).fill("none").stroke({ color: PLANET_COLOR, width: 0.3}).scale(3); 
+    }
+
+    return y
+}
+
+function doAllAspects(chart, planetLocations) {
+
+    var y = 400
+    var x = 100
+
+    chart.text("aspects").move(x,y).fill("#0ff")
+    y += lineHeight
+
+    var conjunctions = findAspects(planetLocations, deg2rad * 10, 0)
+    drawAspectLines(chart, conjunctions, planetLocations)
+    y = drawAspectTable(chart, conjunctions, "con", y, x)
+
+    var oppositions = findAspects(planetLocations, deg2rad * 10, deg2rad * 180)
+    drawAspectLines(chart, oppositions, planetLocations)
+    y = drawAspectTable(chart, oppositions, "opp", y, x)
+
+    var trines = findAspects(planetLocations, deg2rad * 7.5, deg2rad * 120)
+    drawAspectLines(chart, trines, planetLocations)
+    y = drawAspectTable(chart, trines, "tri", y, x)
+
+    var squares = findAspects(planetLocations, deg2rad * 7.5, deg2rad * 90)
+    drawAspectLines(chart, squares, planetLocations)
+    y = drawAspectTable(chart, squares, "squ", y, x)
+
+    var sextile = findAspects(planetLocations, deg2rad * 7.5, deg2rad * 30)
+    drawAspectLines(chart, sextile, planetLocations)
+    y = drawAspectTable(chart, sextile, "sex", y, x)
+
 }

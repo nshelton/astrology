@@ -16,7 +16,7 @@ rad2deg = 1/deg2rad;
 _Time = new Date('Aug 24, 1989 2:10:00 PDT') //reza
 
 
-// var _Time = new Date('June 11, 1989 23:05:00')
+var _Time = new Date('June 11, 1989 23:05:00')
 // _Time = new Date('June 21, 1959 23:05:00')
 // _Time = new Date('April 10, 1991 23:05:00 CDT')
 // _Time = new Date('Feb 22, 1986 7:00:00 EST')
@@ -39,8 +39,8 @@ _Time.setFullYear(Math.floor(Math.random() *40 + 1980))
 // _Observer = new Astronomy.Observer(33.014996366375, -96.67997803873509, 0); // dallas
 
 
-cityname = "santa cruz"
-_Observer = new Astronomy.Observer(36.977887203085494, -121.90832941577683, 0); 
+// cityname = "santa cruz"
+// _Observer = new Astronomy.Observer(36.977887203085494, -121.90832941577683, 0); 
 
 
 
@@ -51,8 +51,8 @@ _Observer = new Astronomy.Observer(36.977887203085494, -121.90832941577683, 0);
 // cityname = "washington, DC"
 // _Observer = new Astronomy.Observer(38.9240400110907, -77.00558584122027, 0); // dallas
 
-// cityname = "roswell"
-// _Observer = new Astronomy.Observer(33.40416482155773, -104.53147490972424, 0); // dallas
+cityname = "roswell"
+_Observer = new Astronomy.Observer(33.40416482155773, -104.53147490972424, 0); // dallas
 
 // cityname = "paris"
 // _Observer = new Astronomy.Observer(48.862420104011264, 2.356997754939505, 0); 
@@ -70,7 +70,7 @@ eclipticCenter = fromCelestialHour(18,66.5)
 let drawraditionalHouses = false
 let drawStars = true;
 let drawOrbits = true;
-let drawConjunctions = true;
+let drawAspects = true;
 
 let maxMag = 5
 let eclipticRadius = 620/2
@@ -89,170 +89,12 @@ function DrawArrow(chart, point, length, rad, arrowWidth) {
     chart.line(point1[0], point1[1], point2[0], point2[1]).stroke(QUAD_COLOR)
 }
 
-function drawLineFromPoints(chart, points, color) {
-    lastPoint = points[0]
-    for (var i = 1; i < points.length; i ++) {
-        var point = points[i]
-        chart.line(lastPoint[0], lastPoint[1], point[0], point[1]).stroke(color)
-        lastPoint = point
-    }
-}
-
 
 let QUAD_COLOR = "#ff0"
 let STAR_COLOR = "#0ff"
 let ORBIT_COLOR = "#f0f"
 let PLANET_COLOR = "#f00"
 let TEXT_COLOR = "#f0f"
-
-
-function bisectAngles(angles) {
-
-    var centers = []
-    for ( var i = 0 ; i < angles.length; i ++) {
-        var a0 = angles[i];
-        var a1 = angles[(i + 1) %12];
-        var mina = Math.min(a0, a1)
-        var maxa = Math.max(a0, a1)
-        if (maxa - mina > Math.PI ) {
-            mina += Math.PI * 2
-        }
-        centers.push((mina + maxa)/2)
-    }
-    return centers
-}
-
-
-function printText(chart, str, x, y) {
-    var width = 15
-    var orig = [x,y]
-    for(var i = 0; i < str.length; i++) {
-        var p = fontGlyphs[str[i]]
-        var yoff = getGlyphOffset(str[i]) 
-        if ( p != null) {
-            chart.path(p).move(x, y + yoff).stroke("#fff").fill("none")
-        }
-
-        x += getGlyphWidth(str[i])
-    }
-
-    chart.line(orig[0], orig[1]+ 20, x, y+ 20 ).stroke("#fff").fill("none")
-
-}
-
-
-function printTextAngle(chart, str, x, y ) {
-    var angle = getAngle([x,y])
-    var rad = getDistance([x,y])
-
-    for(var i = 0; i < str.length; i++) {
-        var pathData = fontGlyphs[str[i]]
-
-        if ( pathData == null) {
-            rad += 20
-            continue;
-        }
-
-        var yoff = GetHeightOffset(str[i])
-        var angleOffset = yoff * 0.000001 * rad;
-        var pathstring = ""
-        rad += getGlyphWidth(str[i])/2
-        var pos =  fromRadial(angle + angleOffset, rad) 
-
-        for(var j =0; j < pathData.length; j+=3) {
-            pathstring += pathData[j] + " " +  pathData[j+1] + " " + (pathData[j+2]).toFixed(0) + " "
-        }
-        chart.path(pathstring).cx(pos[0]).cy(pos[1]).stroke("#0f0").fill("none").rotate(angle *  rad2deg)
-        rad += getGlyphWidth(str[i])/2
-    }
-}
-
-
-function printTextRadial(chart, str, rad, theta ) {
-    var angle = theta
-    var scale = 0.6
-
-    for(var i = 0; i < str.length; i++) {
-        var pathData = fontGlyphs[str[i]]
-
-        if ( pathData == null) {
-            angle += 0.01
-            continue;
-        }
-
-        var rOff = scale * GetRadiusOffset(str[i])
-        var pathstring = ""
-        var angleScale = scale /rad
-        angle += angleScale * getGlyphWidth(str[i])/2
-
-        var pos = fromRadial(angle, rad + rOff) 
-
-        for(var j =0; j < pathData.length; j+=3) {
-            pathstring += pathData[j] + " " +  pathData[j+1] + " " + (pathData[j+2])+ " "
-        }
-
-        chart.path(pathstring).cx(pos[0]).cy(pos[1]).stroke("#0f0").fill("none").rotate(angle * rad2deg + 90).scale(scale)
-        angle += angleScale * getGlyphWidth(str[i])/2
-    }
-}
-
-
-
-function printRing(chart, names, angles, radius, length, color, textsize) {
-    chart.circle(radius).cx(center[0]).cy(center[1]).stroke(color).fill("none")
-    chart.circle(radius + length*2).cx(center[0]).cy(center[1]).stroke(color).fill("none")
-
-    var centers = bisectAngles(angles);
-
-    for (let i = 0; i < angles.length; i++) {
-        const angle = angles[i];
-
-        var p0 = fromRadial(angle , radius/2 + length/2)
-        chart.text(names[i]).cx(p0[0]).cy(p0[1]).scale(textsize).rotate(angle * rad2deg + 90 ).fill("none").stroke({ color: color, width: 0.3}) 
-    }
-
-    for (let i = 0; i < centers.length; i++) {
-        const angle = centers[i];
-
-        var p0 = fromRadial(angle, radius/2)
-        var p1 = fromRadial(angle, radius/2 + length)
-
-        chart.line(p0[0], p0[1], p1[0], p1[1]).stroke(color)
-
-    }
-}
-
-
-function printGlyphRing(chart, angles, radius, length, color, textsize) {
-    chart.circle(radius).cx(center[0]).cy(center[1]).stroke(color).fill("none")
-    chart.circle(radius + length*2).cx(center[0]).cy(center[1]).stroke(color).fill("none")
-
-    var centers = bisectAngles(angles);
-
-    for (let i = 0; i < angles.length; i++) {
-        const angle = angles[i];
-
-        var p0 = fromRadial(angle , radius/2 + length/2)
-        // chart.text(names[i]).cx(p0[0]).cy(p0[1]).scale(textsize).rotate(angle * rad2deg + 90 ).fill("none").stroke({ color: color, width: 0.3}) 
-        chart.path(zodiacGlyph[i]).cx(p0[0]).cy(p0[1]).scale(textsize*2).rotate(angle * rad2deg + 90 ).fill("none").stroke({ color: color, width: 0.3}) 
-    }
-
-    for (let i = 0; i < centers.length; i++) {
-        const angle = centers[i];
-
-        var p0 = fromRadial(angle, radius/2)
-        var p1 = fromRadial(angle, radius/2 + length)
-
-        chart.line(p0[0], p0[1], p1[0], p1[1]).stroke(color)
-
-    }
-}
-function drawPlanet(chart, coord, col) {
-    chart.circle(1).cx(coord[0]).cy(coord[1]).stroke(col).fill('none')
-    chart.circle(10).cx(coord[0]).cy(coord[1]).stroke(col).fill('none')
-    chart.circle(50).cx(coord[0]).cy(coord[1]).stroke(col).fill("none")
-    chart.circle(60).cx(coord[0]).cy(coord[1]).stroke(col).fill("none")
-}
 
 function createPlot() {
 
@@ -265,7 +107,6 @@ function createPlot() {
     // testing 
     // printTextRadial(chart, "abcdefghijklmnopqrstuvwxyz1234567890", 650,  - 2);
     // chart.circle(650*2).cx(center[0]).cy(center[1]).stroke('#aaa').fill("none")
-
 
     $.getJSON("./constellations.lines.json", function(json) {
 
@@ -306,9 +147,7 @@ function createPlot() {
         printGlyphRing(chart, basicAngles, 325, 50, "#f0f", 1)
 
         // ------------- zodiac description  --------------------------
-        
-        chart.circle(400).cx(center[0]).cy(center[1]).stroke(STAR_COLOR).fill("none")
-        chart.circle(400 + 100).cx(center[0]).cy(center[1]).stroke(STAR_COLOR).fill("none")
+         
     
         for (let i = 0; i < zodiacAngles.length; i++) {
             const angle = zodiacAngles[i];
@@ -347,9 +186,8 @@ function createPlot() {
             var location = labels[name]
             var planetLocation = planetLocations[name]
 
-            var lineDst = setDistance(planetLocation, planetRad);
+            var lineDst = setDistance(planetLocation, 500);
  
-            var pos3 = setDistance(location, getDistance(location) + 70);
             var angle = getAngle(location)
 
             outerPlanet = setDistance(planetLocation, getDistance(planetLocation) + 30)
@@ -359,11 +197,12 @@ function createPlot() {
             inner1 = setDistance(planetLocation, 210)
             chart.line(inner0[0], inner0[1], inner1[0], inner1[1]).stroke(PLANET_COLOR)
 
-            chart.path(planetGlyph[i]).cx(location[0]).cy(location[1]).scale(8).rotate(angle * rad2deg - 90 ).fill("none").stroke({ color: PLANET_COLOR, width: 0.3}) 
+            chart.path(planetGlyph[i]).cx(location[0]).cy(location[1]).scale(6).rotate(angle * rad2deg - 90 ).fill("none").stroke({ color: PLANET_COLOR, width: 0.3}) 
 
             // chart.text( getPlanetInfo([planetNames[i]])).cx().cy(pos3[1]).scale(1).rotate(angle * rad2deg ).fill(TEXT_COLOR)
+            var textPos = setDistance(location, getDistance(location)+ 30);
 
-            printTextAngle(chart, getPlanetInfo([planetNames[i]]), pos3[0], pos3[1])
+            printTextAngle(chart, getPlanetInfo([planetNames[i]]), textPos[0], textPos[1])
 
         }
         
@@ -428,17 +267,6 @@ function createPlot() {
             drawLineFromPoints(chart, horizonPoints, QUAD_COLOR)
         }
 
-        // for ( var i = 0 ; i < 361; i +=10) {
-        //     var horizonPoints = []
-
-        //         for ( var j= -90 ; j < 90; j += 1 ) {
-        //         const horiz = new Astronomy.Spherical(  j, i , 100.0);                   /* any positive distance value will work fine. */
-        //         coord = transfromHorizToScreen(horiz)
-        //         horizonPoints.push(coord)
-        //     }
-        //     drawLineFromPoints(chart, horizonPoints, QUAD_COLOR)
-        // }
-
         const horiz = new Astronomy.Spherical(  90 , 90, 100.0);                   /* any positive distance value will work fine. */
         directlyUp = transfromHorizToScreen(horiz)
         northpole = EllipticFromCelestialLonLat(0, 90)
@@ -447,6 +275,23 @@ function createPlot() {
 
         var MCangle = getAngle(directlyUp, northpole);
 
+
+        northpole = EllipticFromCelestialLonLat(0, 90)
+        N = EllipticFromCelestialLonLat(90, 85)
+        E = EllipticFromCelestialLonLat(0, 85)
+        S = EllipticFromCelestialLonLat(180, 85)
+        W = EllipticFromCelestialLonLat(270, 85)
+
+        chart.line(northpole[0], northpole[1], N[0], N[1]).stroke('#fff').fill("none")
+        chart.line(northpole[0], northpole[1], E[0], E[1]).stroke('#fff').fill("none")
+        chart.line(northpole[0], northpole[1], S[0], S[1]).stroke('#fff').fill("none")
+        chart.line(northpole[0], northpole[1], W[0], W[1]).stroke('#fff').fill("none")
+
+        chart.circle(50).cx(northpole[0]).cy(northpole[1]).stroke(STAR_COLOR).fill("none")
+
+        var eclipticRad = getDistance(northpole)
+        
+        chart.circle(eclipticRad*2).cx(center[0]).cy(center[1]).stroke(STAR_COLOR).fill("none")
 
         var outerRadius = 800/2 + 25
         // /--------------------------------------------ASCendant
@@ -470,13 +315,10 @@ function createPlot() {
         var angle = getAngle(SText)
         chart.text( "MC").cx(SText[0]).cy(SText[1]).fill(QUAD_COLOR).rotate(angle * rad2deg + 90 ).font("size", 35)
 
-
         DrawArrow(chart, mcPoint, 300, outerRadius + 25, 0.07)
 
         // /--------------------------------------------IC
         var icPoint = fromRadial(MCangle + Math.PI, outerRadius)
-
-
         var NText = setDistance(icPoint, outerRadius + textOffset)
         var angle = getAngle(NText) 
         chart.text( "IC").cx(NText[0]).cy(NText[1]).fill(QUAD_COLOR).rotate(angle * rad2deg + 90).font("size", 35)
@@ -519,8 +361,6 @@ function createPlot() {
                     length += 10
                 if ( i% 10 == 0)
                     length += 10    
-                // if ( i% 6 == 0)
-                //     length += 10
 
                 var alpha = (i/30)
                 var angle = alpha * mina + (1-alpha) * maxa
@@ -542,99 +382,11 @@ function createPlot() {
 
         chart.circle(2 * (outerRadius - 75)).cx(center[0]).cy(center[1]).stroke(TEXT_COLOR).fill("none")
 
-        var offs = 1
+        if ( drawAspects) {
 
-       
-        function drawOppSymbol(x,y) {
-            chart.line(x,y, x+10, y+10).stroke("#0ff");
-            chart.circle(5).cx(x).cy(y).stroke("#0ff");
-            chart.circle(5).cx(x+10).cy(y+10).stroke("#0ff"); 
-        }       
-        
-
-        if ( drawConjunctions) {
-
-            conjunctions = findConjunctions(planetLocations, 0.1, Math.PI, center)
-
-            for (var i = 0; i < conjunctions.length; i ++) {
-                conj_line = [planetLocations[conjunctions[i][0]], planetLocations[conjunctions[i][1]]]
-            
-                console.log(conj_line)
-                var l = trimLine(conj_line, 0.9)
-                chart.line(l[0][0] + offs, l[0][1] + offs, l[1][0] + offs, l[1][1]+offs).stroke({ color: '#ff0'})                 
-            }
-
-            /// Draw text infos
-            var lineHeight = 35
-            var y = 400
-            y += lineHeight
-            var x = 300
-            chart.text("Conjunctions").move(x,y).fill("#0ff")
-            
-            for( var i =0; i < conjunctions.length; i++) {
-                var x = 300
-
-                y += lineHeight
-                drawOppSymbol(x,y); x += 30
-
-                chart.path(planetGlyph[planetNames.indexOf(conjunctions[i][0])]).move(x,y).fill("none").stroke({ color: PLANET_COLOR, width: 0.3}).scale(3); x += 30
-                chart.path(planetGlyph[planetNames.indexOf(conjunctions[i][1])]).move(x,y).fill("none").stroke({ color: PLANET_COLOR, width: 0.3}).scale(3); x += 0
-            }
-
-   /////////////////////////////////////////////////////////////////////////////////////////////////////
-            conjunctions = findConjunctions(planetLocations, 0.1, Math.PI/2, center)
-
-            for (var i = 0; i < conjunctions.length; i ++) {
-                conj_line = [planetLocations[conjunctions[i][0]], planetLocations[conjunctions[i][1]]]
-            
-                console.log(conj_line)
-                var l = trimLine(conj_line, 0.9)
-                chart.line(l[0][0] + offs, l[0][1] + offs, l[1][0] + offs, l[1][1]+offs).stroke({ color: PLANET_COLOR, width: 0.3});          
-            }
-
-            y += lineHeight
-            var x = 300
-            
-            for( var i =0; i < conjunctions.length; i++) {
-                var x = 300
-
-                y += lineHeight
-                chart.rect(20,20).cx(x).cy(y+5).fill("none").stroke( PLANET_COLOR); x += 30
-
-                chart.path(planetGlyph[planetNames.indexOf(conjunctions[i][0])]).move(x,y).fill("none").stroke({ color: PLANET_COLOR, width: 0.3}).scale(3); x += 30
-                chart.path(planetGlyph[planetNames.indexOf(conjunctions[i][1])]).move(x,y).fill("none").stroke({ color: PLANET_COLOR, width: 0.3}).scale(3); x += 0
-            }
+            doAllAspects(chart, planetLocations)
         }
-
-
-        /////////////////////////////////////////////////////////////////////////////////////////////////////
-        conjunctions = findConjunctions(planetLocations, 0.1, 2 * Math.PI/3, center)
-
-        for (var i = 0; i < conjunctions.length; i ++) {
-            conj_line = [planetLocations[conjunctions[i][0]], planetLocations[conjunctions[i][1]]]
-        
-            console.log(conj_line)
-            var l = trimLine(conj_line, 0.9)
-            chart.line(l[0][0] + offs, l[0][1] + offs, l[1][0] + offs, l[1][1]+offs).stroke({ color: PLANET_COLOR, width: 0.3});          
-        }
-
-        y += lineHeight
-        var x = 300
-        
-        for( var i =0; i < conjunctions.length; i++) {
-            var x = 300
-
-            y += lineHeight
-            // todo draw conjunctions
-            
-            chart.path(planetGlyph[planetNames.indexOf(conjunctions[i][0])]).move(x,y).fill("none").stroke({ color: PLANET_COLOR, width: 0.3}).scale(3); x += 30
-            chart.path(planetGlyph[planetNames.indexOf(conjunctions[i][1])]).move(x,y).fill("none").stroke({ color: PLANET_COLOR, width: 0.3}).scale(3); x += 0
-        }
-    
-
-
- 
-  
+          
         if ( drawStars) {
             $.getJSON("./stars.6.json", function(json) {
     
