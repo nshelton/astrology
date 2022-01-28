@@ -288,40 +288,29 @@ function createPlot() {
         chart.line(northpole[0], northpole[1], W[0], W[1]).stroke('#fff').fill("none")
 
         chart.circle(50).cx(northpole[0]).cy(northpole[1]).stroke(STAR_COLOR).fill("none")
-
         var eclipticRad = getDistance(northpole)
-        
         chart.circle(eclipticRad*2).cx(center[0]).cy(center[1]).stroke(STAR_COLOR).fill("none")
 
         var outerRadius = 800/2 + 25
         // /--------------------------------------------ASCendant
-        var textOffset = 40
-        var EText = setDistance(accPos, outerRadius + textOffset)
-        var angle = getAngle(EText)
-        chart.text( "AC").cx(EText[0]).cy(EText[1]).fill(QUAD_COLOR).rotate(angle * rad2deg + 90 ).font("size", 35)
-
+        var textOffset = 33
+        var accAngle = getAngle(accPos) 
+        printTextRadial(chart, "AC", outerRadius + textOffset, accAngle - 0.05, 1.5)
         DrawArrow(chart, accPos, 300, outerRadius + 25, 0.07)
 
         // /--------------------------------------------Descendant
-        var WText = setDistance(decPos, outerRadius + textOffset)
-        var angle = getAngle(WText) 
-        chart.text( "DC").cx(WText[0]).cy(WText[1]).fill(QUAD_COLOR).rotate(angle * rad2deg + 90).font("size", 35)
-        
+        var dcAngle = getAngle(decPos) 
+        printTextRadial(chart, "DC", outerRadius + textOffset, dcAngle - 0.05, 1.5)
         DrawArrow(chart, decPos, 300, outerRadius + 25, 0.07)
 
         // /--------------------------------------------MC
         var mcPoint = fromRadial(MCangle, outerRadius)
-        var SText = setDistance(mcPoint, outerRadius + textOffset)
-        var angle = getAngle(SText)
-        chart.text( "MC").cx(SText[0]).cy(SText[1]).fill(QUAD_COLOR).rotate(angle * rad2deg + 90 ).font("size", 35)
-
+        printTextRadial(chart, "MC", outerRadius + textOffset, MCangle - 0.05, 1.5)
         DrawArrow(chart, mcPoint, 300, outerRadius + 25, 0.07)
 
         // /--------------------------------------------IC
         var icPoint = fromRadial(MCangle + Math.PI, outerRadius)
-        var NText = setDistance(icPoint, outerRadius + textOffset)
-        var angle = getAngle(NText) 
-        chart.text( "IC").cx(NText[0]).cy(NText[1]).fill(QUAD_COLOR).rotate(angle * rad2deg + 90).font("size", 35)
+        printTextRadial(chart, "IC", outerRadius + textOffset, MCangle + Math.PI - 0.05, 1.5)
 
         DrawArrow(chart, icPoint, 300, outerRadius + 25, 0.07)
 

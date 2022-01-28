@@ -72,9 +72,6 @@ function printText(chart, str, x, y) {
 
         x += getGlyphWidth(str[i])
     }
-
-    chart.line(orig[0], orig[1]+ 20, x, y+ 20 ).stroke("#fff").fill("none")
-
 }
 
 
@@ -105,9 +102,7 @@ function printTextAngle(chart, str, x, y ) {
 }
 
 
-function printTextRadial(chart, str, rad, theta ) {
-    var angle = theta
-    var scale = 0.6
+function printTextRadial(chart, str, rad, angle, scale = 0.6) {
 
     for(var i = 0; i < str.length; i++) {
         var pathData = fontGlyphs[str[i]]
@@ -166,7 +161,6 @@ function printRing(chart, names, angles, radius, length, color, textsize) {
 
     }
 }
-
 
 function printGlyphRing(chart, angles, radius, length, color, textsize) {
     chart.circle(radius).cx(center[0]).cy(center[1]).stroke(color).fill("none")
@@ -270,15 +264,10 @@ function drawAspectSymbol(chart, type, x,y) {
         chart.rect(scale, scale).cx(x).cy(y).stroke("#0ff");
     } else if ( type =="tri") {
         chart.path("M 8.66 0 L 17.3 15 L 0 15 L 8.66 0").cx(x).cy(y).stroke("#0ff").fill("none");
-
     } else if ( type =="sex") {
-
         chart.path("M 8.66 0 L 8.66 20 M 17.3 5 L 0 15 M 17.3 15 L 0 5 Z").cx(x).cy(y).stroke("#0ff").fill("none");
     }
-
 }       
-
-
 
 function drawAspectLines(chart, aspects, planetLocations) {
 
@@ -296,8 +285,6 @@ function drawAspectTable(chart, aspects, type, y, x){
     /// Draw text infos
     var currentx = x
     y += lineHeight
-
-
     
     for( var i =0; i < aspects.length; i++) {
         var currentx = x
@@ -318,8 +305,7 @@ function doAllAspects(chart, planetLocations) {
     var y = 400
     var x = 100
 
-    chart.text("aspects").move(x,y).fill("#0ff")
-    y += lineHeight
+    printText(chart, "aspects", x, y)
 
     var conjunctions = findAspects(planetLocations, deg2rad * 10, 0)
     drawAspectLines(chart, conjunctions, planetLocations)
