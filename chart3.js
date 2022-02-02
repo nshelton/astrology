@@ -18,14 +18,15 @@ rad2deg = 1/deg2rad;
 
 // var _Time = new Date('June 11, 1989 23:05:00')
 // _Time = new Date('June 21, 1959 23:05:00')
-// _Time = new Date('April 10, 1991 23:05:00 CDT')
-// _Time = new Date('Feb 22, 1986 7:00:00 EST')
+// _Time = new Date('April 10, 1991 23:05:00 CDT') // me
+// _Time = new Date('Feb 22, 1986 7:00:00 EST') 
 // _Time = new Date('Dec 2, 1987 05:00:00 EST')
-// _Time = new Date('December 23, 2014 16:20:00 GMT'    )
+// _Time = new Date('December 23, 2014 16:20:00 GMT')  
+// _Time = new Date('July 25, 1986 06:00:00 CDT') //julien
 // _Time = new Date();
 // _Time = new Date('September 19, 1990 07:47:00 PST')
-_Time = new Date('October 22, 1987 05:10:00 MDT')
-_Time = new Date('May, 27 1995 09:33:00 EDT')
+_Time = new Date('October 22, 1987 05:10:00 MDT') 
+
 // _Time.setMonth( Math.round(Math.random() * 11) )
 // _Time.setDate(Math.floor(Math.random() * 30))
 // _Time.setHours(Math.floor(Math.random() * 24))
@@ -34,29 +35,35 @@ _Time = new Date('May, 27 1995 09:33:00 EDT')
 // const _Observer = new Astronomy.Observer(90, 0, 0);
 // _Observer = new Astronomy.Observer(90, 0, 0);
 // cityname = "oakland"
+
 // _Observer = new Astronomy.Observer(37.840270071049474, -122.24752870381347, 0); // oakland
 // _Time.setHours(_Time.getHours() + 6)
-// cityname = "dallas"
-// _Observer = new Astronomy.Observer(33.014996366375, -96.67997803873509, 0); // dallas
 
+// cityname = "dallas"
+// _Observer = new Astronomy.Observer(33.014996366375, -96.67997803873509, 0); 
 
 // cityname = "santa cruz"
 // _Observer = new Astronomy.Observer(36.977887203085494, -121.90832941577683, 0); 
 
-
-
 // cityname = "miami"
-// _Observer = new Astronomy.Observer(25.811984528073324, -80.26892302691793, 0); // dallas
-
+// _Observer = new Astronomy.Observer(25.811984528073324, -80.26892302691793, 0); 
 
 // cityname = "washington, DC"
-// _Observer = new Astronomy.Observer(38.9240400110907, -77.00558584122027, 0); // dallas
+// _Observer = new Astronomy.Observer(38.9240400110907, -77.00558584122027, 0); 
 
 cityname = "roswell"
-_Observer = new Astronomy.Observer(33.40416482155773, -104.53147490972424, 0); // dallas
+_Observer = new Astronomy.Observer(33.40416482155773, -104.53147490972424, 0); 
 
-cityname = "mt kisco, NY"
-_Observer = new Astronomy.Observer(41.20114658395757, -73.72850309013931, 0); // kurt ny
+// cityname = "chicago"
+// _Observer = new Astronomy.Observer(41.891357836957816, -87.72208845978876, 0);
+
+
+// cityname = "mt kisco, NY" //kurt
+// _Observer = new Astronomy.Observer(41.20114658395757, -73.72850309013931, 0); // kurt ny
+// _Time = new Date('May, 27 1995 09:33:00 EDT') //
+
+// cityname = "los angeles"
+// _Observer = new Astronomy.Observer(34.062555721829476, -118.25982965675526, 0); // kurt ny
 
 
 // cityname = "paris"
@@ -76,9 +83,9 @@ let drawraditionalHouses = false
 let drawStars = true;
 let drawOrbits = true;
 let drawAspects = true;
-let drawHouseTable= false; /// this has some math bugs 
+let drawHouseTable= true; /// this has some math bugs 
 
-let maxMag = 5
+let maxMag = 4
 let eclipticRadius = 620/2
 
 function DrawArrow(chart, point, length, rad, arrowWidth) {
@@ -300,26 +307,28 @@ function createPlot() {
         // /--------------------------------------------ASCendant
         var textOffset = 33
         var accAngle = getAngle(accPos) 
-        printTextRadial(chart, "AC", outerRadius + textOffset, accAngle - 0.05, 1.5)
-        DrawArrow(chart, accPos, 300, outerRadius + 25, 0.07)
+        printTextRadial(chart, "AC", outerRadius + textOffset, accAngle + 0.05, 1.5)
+        DrawArrow(chart, accPos, 300, outerRadius + 75, 0.07)
 
         // /--------------------------------------------Descendant
         var dcAngle = getAngle(decPos) 
-        printTextRadial(chart, "DC", outerRadius + textOffset, dcAngle - 0.05, 1.5)
-        DrawArrow(chart, decPos, 300, outerRadius + 25, 0.07)
+        printTextRadial(chart, "DC", outerRadius + textOffset, dcAngle + 0.05, 1.5)
+        DrawArrow(chart, decPos, 300, outerRadius + 75, 0.07)
 
         // /--------------------------------------------MC
         var mcPoint = fromRadial(MCangle, outerRadius)
-        printTextRadial(chart, "MC", outerRadius + textOffset, MCangle - 0.05, 1.5)
-        DrawArrow(chart, mcPoint, 300, outerRadius + 25, 0.07)
+        printTextRadial(chart, "MC", outerRadius + textOffset, MCangle + 0.05, 1.5)
+        DrawArrow(chart, mcPoint, 300, outerRadius + 75, 0.07)
 
         // /--------------------------------------------IC
         var icPoint = fromRadial(MCangle + Math.PI, outerRadius)
-        printTextRadial(chart, "IC", outerRadius + textOffset, MCangle + Math.PI - 0.05, 1.5)
+        printTextRadial(chart, "IC", outerRadius + textOffset, MCangle + Math.PI + 0.05, 1.5)
 
-        DrawArrow(chart, icPoint, 300, outerRadius + 25, 0.07)
+        DrawArrow(chart, icPoint, 300, outerRadius + 75, 0.07)
 
         var houseAngles = createPorphyryHouses(accPos, mcPoint, decPos, icPoint, center)
+        console.log("houseangles:")
+        console.log(houseAngles)
         var houseLabels = []
         for ( var i = 0 ; i < houseAngles.length; i ++) {
             var a0 = houseAngles[i];
@@ -394,7 +403,11 @@ function createPlot() {
                 var angle = getAngle(planetLocations[body])
                 var houseDeg = getHouse(angle, houseAngles)
                 printText(chart, houseDeg[0].toFixed(0), x + 40, y-5)
-                printText(chart, houseDeg[1].toFixed(0), x + 90, y-5)
+                var degrees = houseDeg[1].toFixed(0)
+                if(degrees.length ==1)
+                    degrees = "0" + degrees;
+                printText(chart, degrees, x + 90, y-5)
+                chart.circle(7).cx(x+130).cy(y-5).stroke("#aaa")
             }
         }
           
@@ -414,10 +427,12 @@ function createPlot() {
                 }
             });
         }
-  
     });
-}
 
+
+    printText(chart, _Time.toString().replace("(Pacific Daylight Time)", ""),  200, 1700)
+    printText(chart, cityname, 200, 1750)
+}
 
 $( document ).ready(function() {
     createPlot();

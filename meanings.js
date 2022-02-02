@@ -19,16 +19,16 @@ function getHouseInfo(i) {
 function getHouseInfo2(i) {
     var houses =  {
         1 : "self",
-        2 : "gain",
-        3 : "order",
-        4 : "parent",
-        5 : "children",
+        2 : "posessions",
+        3 : "communication",
+        4 : "home",
+        5 : "pleasure",
         6 : "health",
-        7 : "partner",
+        7 : "relationships",
         8 : "death",
-        9 : "purpose",
-        10 : "kingdom",
-        11 : "support",
+        9 : "philosophy",
+        10 : "ambition",
+        11 : "friendship",
         12 : "unconscious",
     }
     return houses[i]
@@ -42,10 +42,10 @@ function getPlanetInfo(name) {
         'Venus' : "pleasure",
         'Mars' : "action",
         'Jupiter' : "success",
-        'Saturn' : "restriction",
+        'Saturn' : "structure",
         'Uranus' : "rebellion",
         'Neptune' : "imagination",
-        'Pluto' : "power"
+        'Pluto' : "rebirth"
     }
     return planetMeaning[name]
 }
@@ -53,18 +53,18 @@ function getPlanetInfo(name) {
 
 function getZodiacInfo(i) {
     var zodiac =  {
-        1 : "brave",
+        1 : "bravery",
         2 : "drive",
-        3 : "communication",
-        4 : "nurturing",
-        5 : "brave",
-        6 : "helper",
-        7 : "fair",
+        3 : "intelligence",
+        4 : "healing",
+        5 : "power",
+        6 : "modesty",
+        7 : "harmony",
         8 : "passion",
         9 : "ambition",
-        10 : "drive",
+        10 : "discipline",
         11 : "eccentric",
-        12 : "intuitive",
+        12 : "imagination"
     }
     return zodiac[i]
 }

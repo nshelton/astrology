@@ -101,7 +101,6 @@ function printTextAngle(chart, str, x, y ) {
     }
 }
 
-
 function printTextRadial(chart, str, rad, angle, scale = 0.6) {
 
     for(var i = 0; i < str.length; i++) {
@@ -237,6 +236,7 @@ function createPorphyryHouses(asc_Point, mc_Point, dsc_Point, ic_Point, center) 
     var a2 = getAngle(dsc_Point, center)
     var a3 = getAngle(ic_Point, center)
     markers = [a0, a1, a2, a3]
+    console.log(markers)
     markers.sort(function(a,b) {
         return (+a) - (+b);
     });
@@ -260,6 +260,11 @@ function createPorphyryHouses(asc_Point, mc_Point, dsc_Point, ic_Point, center) 
     // rotate so Asc is 0 
     houses = houses.slice(ACIndex, houses.length).concat(houses.slice(0,ACIndex));
 
+    for (let i = 0; i < houses.length; i++) {
+        while(houses[i] < 0 ) {
+            houses[i] += Math.PI * 2
+        }
+    }
     return houses
 }
        
@@ -293,33 +298,29 @@ function drawAspectLines(chart, aspects, planetLocations) {
     }
 }
 var lineHeight = 35
+ 
 
 function getHouse(planetAngle, houseAngles) {
-    console.log(planetAngle)
-    console.log(houseAngles)
+    // enforcing that all angles are 0 - 2pi
+    if ( planetAngle < 0) {
+        planetAngle += Math.PI * 2
+    }
+
 
     for (let i = 0; i < houseAngles.length; i++) {
         var housenum = 12 - i 
-
         
         var a0 = houseAngles[i];
-        var a1 = houseAngles[(i + 1) %12];
+        var a1 = houseAngles[(i + 1) % 12];
 
-        while(a0 < 0 || a1 < 0 || planetAngle < 0) {
-            a1 += Math.PI*2
-            a0 += Math.PI*2
-            planetAngle += Math.PI*2
+        // we got a wrap here
+        if ( a1 < a0) {
+            a1 += Math.PI * 2
         }
 
-        var mina = Math.min(a0, a1)
-        var maxa = Math.max(a0, a1)
-        
-        if (maxa - mina > Math.PI ) {
-            mina += Math.PI * 2
-        }
-
-        if ( planetAngle > mina && planetAngle < maxa) {
-            let deg = 30 * (   (planetAngle - mina) / (maxa - mina))
+        if ( planetAngle > a0 && planetAngle < a1) {
+            console.log("house", housenum)
+            let deg = 30 * ( (planetAngle - a0) / (a1 - a0))
             return [housenum,  deg];
         }
     }
