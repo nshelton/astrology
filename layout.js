@@ -209,7 +209,7 @@ function findAspects(positions, thresh, target)  {
     // move to fixed radius
     let angles = {}
     for (var i = 0; i < planetNames.length; i ++) {
-        angles[planetNames[i]] =  getAngle(positions[planetNames[i]])
+        angles[planetNames[i]] = getAngle(positions[planetNames[i]])
         if ( angles[planetNames[i]] < 0 )
             angles[planetNames[i]] += Math.PI * 2
     }
@@ -220,7 +220,7 @@ function findAspects(positions, thresh, target)  {
             var a1 = angles[planetNames[j]]
             var mina = Math.min(a0, a1)
             var maxa = Math.max(a0, a1)
-            if(i != j && abs((maxa - mina) - target)  < thresh) {
+            if(i != j && abs((maxa - mina) - target) < thresh) {
                 if ( !containsPair(conj, planetNames[i], planetNames[j]))
                     conj.push([planetNames[i], planetNames[j]]) 
             }
@@ -371,7 +371,7 @@ function doAllAspects(chart, planetLocations) {
     var trines = findAspects(planetLocations, deg2rad * 7.5, deg2rad * 120)
     drawAspectLines(chart, trines, planetLocations)
     y = drawAspectTable(chart, trines, "tri", y, x)
-    if ( y > 1000)
+
     var squares = findAspects(planetLocations, deg2rad * 7.5, deg2rad * 90)
     drawAspectLines(chart, squares, planetLocations)
     y = drawAspectTable(chart, squares, "squ", y, x)

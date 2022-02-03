@@ -18,14 +18,14 @@ rad2deg = 1/deg2rad;
 
 // var _Time = new Date('June 11, 1989 23:05:00')
 // _Time = new Date('June 21, 1959 23:05:00')
-// _Time = new Date('April 10, 1991 23:05:00 CDT') // me
+_Time = new Date('April 10, 1991 23:05:00 CDT') // me
 // _Time = new Date('Feb 22, 1986 7:00:00 EST') 
 // _Time = new Date('Dec 2, 1987 05:00:00 EST')
 // _Time = new Date('December 23, 2014 16:20:00 GMT')  
 // _Time = new Date('July 25, 1986 06:00:00 CDT') //julien
 // _Time = new Date();
 // _Time = new Date('September 19, 1990 07:47:00 PST')
-_Time = new Date('October 22, 1987 05:10:00 MDT') 
+// _Time = new Date('October 22, 1987 05:10:00 MDT') 
 
 // _Time.setMonth( Math.round(Math.random() * 11) )
 // _Time.setDate(Math.floor(Math.random() * 30))
@@ -39,8 +39,8 @@ _Time = new Date('October 22, 1987 05:10:00 MDT')
 // _Observer = new Astronomy.Observer(37.840270071049474, -122.24752870381347, 0); // oakland
 // _Time.setHours(_Time.getHours() + 6)
 
-// cityname = "dallas"
-// _Observer = new Astronomy.Observer(33.014996366375, -96.67997803873509, 0); 
+cityname = "dallas"
+_Observer = new Astronomy.Observer(33.014996366375, -96.67997803873509, 0); 
 
 // cityname = "santa cruz"
 // _Observer = new Astronomy.Observer(36.977887203085494, -121.90832941577683, 0); 
@@ -51,8 +51,8 @@ _Time = new Date('October 22, 1987 05:10:00 MDT')
 // cityname = "washington, DC"
 // _Observer = new Astronomy.Observer(38.9240400110907, -77.00558584122027, 0); 
 
-cityname = "roswell"
-_Observer = new Astronomy.Observer(33.40416482155773, -104.53147490972424, 0); 
+// cityname = "roswell"
+// _Observer = new Astronomy.Observer(33.40416482155773, -104.53147490972424, 0); 
 
 // cityname = "chicago"
 // _Observer = new Astronomy.Observer(41.891357836957816, -87.72208845978876, 0);
@@ -74,7 +74,7 @@ _Observer = new Astronomy.Observer(33.40416482155773, -104.53147490972424, 0);
 const Rotation_HOR_EQJ = Astronomy.Rotation_HOR_EQJ( _Time, _Observer);
 const Rotation_EQJ_ECL = Astronomy.Rotation_EQJ_ECL();
 
-var scale = 200
+var scale = 180
 var center = [1000,1000]
 
 eclipticCenter = fromCelestialHour(18,66.5)
@@ -86,7 +86,7 @@ let drawAspects = true;
 let drawHouseTable= true; /// this has some math bugs 
 
 let maxMag = 4
-let eclipticRadius = 620/2
+let eclipticRadius = 0.9 * 620/2
 
 function DrawArrow(chart, point, length, rad, arrowWidth) {
 
@@ -230,10 +230,73 @@ function createPlot() {
                     let equ_ofdate = Astronomy.Equator(body, newDate, _Observer, true, true);
                     coord = EllipticFromCelestialHour(equ_ofdate.ra, equ_ofdate.dec)
                     points.push(coord)
+                  
                 }
 
                 drawLineFromPoints(chart, points, ORBIT_COLOR)
             }
+
+            var newDate = new Date(_Time) 
+            newDate.setDate(newDate.getDate() - 5 );
+            var points = []
+
+            var lastRad = 0;
+            var lastAngle = 0;
+            var avgSouthNode = 0
+            var numSouthNode = 0
+
+            var avgNorthNode = 0
+            var numNorthNode = 0
+
+            for(var i = 0; i < 360; i ++) {
+                newDate.setDate(newDate.getDate() + 1);
+                let equ_ofdate = Astronomy.Equator("Moon", newDate, _Observer, true, true);
+                coord = EllipticFromCelestialHour(equ_ofdate.ra, equ_ofdate.dec)
+                points.push(coord)
+                let rad = getDistance(coord)
+                let angle = getAngle(coord)
+
+                if ( i > 0) { 
+                    if(lastRad < eclipticRadius && rad > eclipticRadius) {
+                        var angle1 = lastAngle
+                        var angle0 = angle
+
+                        var r0 = lastRad - eclipticRadius
+                        var r1 = rad - eclipticRadius
+
+                        var alpha = r0 / (r1-r0)
+                        var aprime = angle1 + alpha * (angle1 - angle0)
+                        avgSouthNode += (angle + lastAngle)/2
+                        numSouthNode ++
+
+                    } else if (lastRad > eclipticRadius && rad < eclipticRadius) {
+
+                        var angle1 = lastAngle
+                        var angle0 = angle
+
+                        var r0 = rad - eclipticRadius
+                        var r1 = lastRad - eclipticRadius
+
+                        var alpha = r0 / (r1-r0)
+                        var aprime = angle1 + alpha * (angle1 - angle0)
+                        avgNorthNode += (angle + lastAngle)/2
+                        numNorthNode ++
+                    }
+                }
+
+                lastAngle = angle;
+                lastRad = rad;
+            }
+            let southAngle = avgSouthNode/numSouthNode;
+            let northAngle = avgNorthNode/numNorthNode;
+
+            var dir = fromRadial(southAngle, 340);
+            chart.path(nodeGlyph).cx(dir[0]).cy(dir[1]).scale(5).rotate(southAngle * rad2deg + 90 ).fill("none").stroke({ color: PLANET_COLOR, width: 0.1}) 
+
+            dir = fromRadial(northAngle, 340);
+            chart.path(nodeGlyph).cx(dir[0]).cy(dir[1]).scale(5).rotate(northAngle * rad2deg - 90 ).fill("none").stroke({ color: PLANET_COLOR, width: 0.1}) 
+
+            // drawLineFromPoints(chart, points, "#ff0")
         }
 
         function transfromHorizToScreen(horiz) {
@@ -266,6 +329,7 @@ function createPlot() {
 
             lastRad = rad;
         }
+        
 
         // graw horizon rings
 
@@ -423,6 +487,7 @@ function createPlot() {
          
                     r = Math.pow(maxMag - mag, 1.2); 
                     coord = EllipticFromCelestialLonLat(lonLat[0], lonLat[1])
+
                     rect = chart.circle(r).cx(coord[0]).cy(coord[1]).stroke('#0ff').fill("none")
                 }
             });
@@ -432,9 +497,14 @@ function createPlot() {
 
     printText(chart, _Time.toString().replace("(Pacific Daylight Time)", ""),  200, 1700)
     printText(chart, cityname, 200, 1750)
+
+    chart.circle(eclipticRadius).cx(center[0]).cy(center[1]).stroke('#0f0').fill("none").scale(2)
+
 }
 
 $( document ).ready(function() {
     createPlot();
+
+
 });
 
