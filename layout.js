@@ -75,7 +75,7 @@ function printText(chart, str, x, y) {
 }
 
 
-function printTextAngle(chart, str, x, y ) {
+function printTextAngle(chart, str, x, y,scale = 1) {
     var angle = getAngle([x,y])
     var rad = getDistance([x,y])
 
@@ -96,8 +96,8 @@ function printTextAngle(chart, str, x, y ) {
         for(var j =0; j < pathData.length; j+=3) {
             pathstring += pathData[j] + " " +  pathData[j+1] + " " + (pathData[j+2]).toFixed(0) + " "
         }
-        chart.path(pathstring).cx(pos[0]).cy(pos[1]).stroke("#0f0").fill("none").rotate(angle *  rad2deg)
-        rad += getGlyphWidth(str[i])/2
+        chart.path(pathstring).cx(pos[0]).cy(pos[1]).stroke("#0f0").fill("none").rotate(angle *  rad2deg).scale(scale)
+        rad += getGlyphWidth(str[i])/2*scale
     }
 }
 
@@ -297,7 +297,6 @@ function drawAspectLines(chart, aspects, planetLocations) {
         chart.line(l[0][0] + offs, l[0][1] + offs, l[1][0] + offs, l[1][1]+offs).stroke({ color: '#ff0'})                 
     }
 }
-var lineHeight = 35
  
 
 function getHouse(planetAngle, houseAngles) {
@@ -328,6 +327,7 @@ function getHouse(planetAngle, houseAngles) {
     return [-1, -1]
 }
 
+var lineHeight = 45
 
 function drawAspectTable(chart, aspects, type, y, x){
     /// Draw text infos
@@ -380,4 +380,48 @@ function doAllAspects(chart, planetLocations) {
     drawAspectLines(chart, sextile, planetLocations)
     y = drawAspectTable(chart, sextile, "sex", y, x)
 
+}
+
+function basicMoonPath(r, reverse, flipx) {
+
+    var direction = reverse ? "0" : "1"
+    var arc = flipx ? "0" : "1"
+    var moonPath = "M 5 0 A 5,5 0 0,"+arc+" 5,10"
+    moonPath += "M 5 -1 A 5.5,5.5 0 0,0 5,11"
+    moonPath += "M 5,11 A 5.5,5.5 0 0,0 5,-1"
+
+    if ( flipx) {
+        moonPath += "M 5,0 A " + r.toFixed(0) + ","+r.toFixed(0) +" 0 0,"+direction + " 5,10"
+
+    } else {
+        moonPath += "M 5,0 A " + r.toFixed(0) + ","+r.toFixed(0) +" 0 0,"+direction + " 5,10"
+
+    }
+
+    return moonPath;
+
+}
+
+function createMoonPath(chart, i) {
+    var phase = i / 90
+    
+    var pInt = Math.floor(phase)
+    var pFrac = phase - pInt;
+
+    if ( pInt == 0) {
+        r = Math.max(Math.min(5 / ((1 - pFrac) + 0.001), 500), -500)
+        return chart.path(basicMoonPath(r, true, true)).fill("none")
+    }
+    if ( pInt == 1) {
+        r = Math.max(Math.min(5 / ( pFrac + 0.001), 500), -500)
+        return chart.path(basicMoonPath(r, false, true)).fill("none")
+    }
+    if ( pInt == 2) {
+        r = Math.max(Math.min(5 / ((1-pFrac) + 0.001), 500), -500)
+        return chart.path(basicMoonPath(r, true, false)).fill("none")
+    }
+    if ( pInt == 3) {
+        r = Math.max(Math.min(5 / (pFrac + 0.001), 500), -500)
+        return chart.path(basicMoonPath(r, false, false)).fill("none")
+    }
 }

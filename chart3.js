@@ -1,46 +1,31 @@
 
 
-function sin(x) { return Math.sin(x) }
-function cos(x) { return Math.cos(x) }
-function sqrt(x) { return Math.sqrt(x) }
-function acos(x) { return Math.acos(x) }
-function abs(x) { return Math.abs(x) }
-function sign(x) { return Math.sign(x) }
-function atan2(x,y) { return Math.atan2(x,y) }
-
 
 deg2rad =  0.01745329252;
 rad2deg = 1/deg2rad;
 
-
-// _Time = new Date('Aug 24, 1989 2:10:00 PDT') //reza
-
-
+// _Time = new Date('Aug 24, 1989 2:10:00 PDT') //"reza"
 // var _Time = new Date('June 11, 1989 23:05:00')
 // _Time = new Date('June 21, 1959 23:05:00')
-_Time = new Date('April 10, 1991 23:05:00 CDT') // me
+// _Time = new Date('April 10, 1991 23:05:00 CDT') 
 // _Time = new Date('Feb 22, 1986 7:00:00 EST') 
 // _Time = new Date('Dec 2, 1987 05:00:00 EST')
 // _Time = new Date('December 23, 2014 16:20:00 GMT')  
 // _Time = new Date('July 25, 1986 06:00:00 CDT') //julien
 // _Time = new Date();
 // _Time = new Date('September 19, 1990 07:47:00 PST')
-// _Time = new Date('October 22, 1987 05:10:00 MDT') 
-
-// _Time.setMonth( Math.round(Math.random() * 11) )
-// _Time.setDate(Math.floor(Math.random() * 30))
-// _Time.setHours(Math.floor(Math.random() * 24))
-// _Time.setFullYear(Math.floor(Math.random() *40 + 1980))
 
 // const _Observer = new Astronomy.Observer(90, 0, 0);
 // _Observer = new Astronomy.Observer(90, 0, 0);
 // cityname = "oakland"
 
 // _Observer = new Astronomy.Observer(37.840270071049474, -122.24752870381347, 0); // oakland
-// _Time.setHours(_Time.getHours() + 6)
+_Observer = new Astronomy.Observer(33.8843687778595, -117.93314973681731, 0); // fullerton
+_Time = new Date('September 18, 1992 18:30:00 PDT') // heidi?
+cityname = "fullerton"
 
-cityname = "dallas"
-_Observer = new Astronomy.Observer(33.014996366375, -96.67997803873509, 0); 
+// cityname = "dallas"
+// _Observer = new Astronomy.Observer(33.014996366375, -96.67997803873509, 0); 
 
 // cityname = "santa cruz"
 // _Observer = new Astronomy.Observer(36.977887203085494, -121.90832941577683, 0); 
@@ -53,22 +38,27 @@ _Observer = new Astronomy.Observer(33.014996366375, -96.67997803873509, 0);
 
 // cityname = "roswell"
 // _Observer = new Astronomy.Observer(33.40416482155773, -104.53147490972424, 0); 
+// _Time = new Date('October 22, 1987 05:10:00 MDT') 
 
 // cityname = "chicago"
 // _Observer = new Astronomy.Observer(41.891357836957816, -87.72208845978876, 0);
 
-
 // cityname = "mt kisco, NY" //kurt
-// _Observer = new Astronomy.Observer(41.20114658395757, -73.72850309013931, 0); // kurt ny
+// _Observer = new Astronomy.Observer(41.20114658395757, -73.72850309013931, 0); 
 // _Time = new Date('May, 27 1995 09:33:00 EDT') //
 
 // cityname = "los angeles"
-// _Observer = new Astronomy.Observer(34.062555721829476, -118.25982965675526, 0); // kurt ny
+// _Observer = new Astronomy.Observer(34.062555721829476, -118.25982965675526, 0); 
 
 
 // cityname = "paris"
 // _Observer = new Astronomy.Observer(48.862420104011264, 2.356997754939505, 0); 
 // _Time.setHours(_Time.getHours() + 1)
+
+// _Time.setMonth( Math.round(Math.random() * 11) )
+// _Time.setDate(Math.floor(Math.random() * 30))
+// _Time.setHours(Math.floor(Math.random() * 24))
+// _Time.setFullYear(Math.floor(Math.random() *40 + 1980))
 
 // const _Observer = new Astronomy.Observer(33.02019285171668, -76.68064645176072, 0);
 const Rotation_HOR_EQJ = Astronomy.Rotation_HOR_EQJ( _Time, _Observer);
@@ -85,7 +75,7 @@ let drawOrbits = true;
 let drawAspects = true;
 let drawHouseTable= true; /// this has some math bugs 
 
-let maxMag = 4
+let maxMag = 6
 let eclipticRadius = 0.9 * 620/2
 
 function DrawArrow(chart, point, length, rad, arrowWidth) {
@@ -210,7 +200,21 @@ function createPlot() {
             inner1 = setDistance(planetLocation, 210)
             chart.line(inner0[0], inner0[1], inner1[0], inner1[1]).stroke(PLANET_COLOR)
 
-            chart.path(planetGlyph[i]).cx(location[0]).cy(location[1]).scale(6).rotate(angle * rad2deg - 90 ).fill("none").stroke({ color: PLANET_COLOR, width: 0.3}) 
+            if ( name == "Moon") {
+            //  0 = new moon // 90 = first quarter // 180 = full moon // 270 = third quarter
+                var phase = Astronomy.MoonPhase(_Time);
+             
+                createMoonPath(chart, phase).move(location[0],location[1]).rotate(angle * rad2deg ).scale(3).stroke({ color: PLANET_COLOR, width:0.3})
+                // chart.circle(40).cx(location[0]).cy(location[1]).stroke(PLANET_COLOR).fill("none")
+                var moonText = fromRadial(angle+ 0.04, 600)
+                var pct = 100 * (1 - (Math.abs(phase - 180) / 180))
+                var waxing = phase < 180 ? "+" : "-"
+                printTextAngle(chart, pct.toFixed(0) + "# " + waxing, moonText[0], moonText[1], 0.6)
+
+
+            } else {
+                chart.path(planetGlyph[i]).cx(location[0]).cy(location[1]).scale(6).rotate(angle * rad2deg - 90 ).fill("none").stroke({ color: PLANET_COLOR, width: 0.3}) 
+            }
 
             // chart.text( getPlanetInfo([planetNames[i]])).cx().cy(pos3[1]).scale(1).rotate(angle * rad2deg ).fill(TEXT_COLOR)
             var textPos = setDistance(location, getDistance(location)+ 30);
@@ -459,7 +463,7 @@ function createPlot() {
             var y = 400
 
             printText(chart, "houses", x, y)
-            y += 35
+            y += 45
 
             for (let body of planetNames) {
                 y += 45
@@ -498,7 +502,16 @@ function createPlot() {
     printText(chart, _Time.toString().replace("(Pacific Daylight Time)", ""),  200, 1700)
     printText(chart, cityname, 200, 1750)
 
-    chart.circle(eclipticRadius).cx(center[0]).cy(center[1]).stroke('#0f0').fill("none").scale(2)
+    // chart.circle(eclipticRadius).cx(center[0]).cy(center[1]).stroke('#0f0').fill("none").scale(2)
+    
+    // var xPos = 20
+    // for (let i = 0; i < 360; i+=10) {
+    //     createMoonPath(chart, i).move(xPos, 100).stroke({"color" : PLANET_COLOR, "width" :0.2}).scale(4)
+    //     xPos += 50
+    // }
+
+
+
 
 }
 

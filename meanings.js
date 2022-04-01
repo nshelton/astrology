@@ -50,7 +50,6 @@ function getPlanetInfo(name) {
     return planetMeaning[name]
 }
 
-
 function getZodiacInfo(i) {
     var zodiac =  {
         1 : "bravery",
@@ -63,7 +62,7 @@ function getZodiacInfo(i) {
         8 : "passion",
         9 : "ambition",
         10 : "discipline",
-        11 : "eccentric",
+        11 : "creative",
         12 : "imagination"
     }
     return zodiac[i]

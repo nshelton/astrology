@@ -1,3 +1,11 @@
+function sin(x) { return Math.sin(x) }
+function cos(x) { return Math.cos(x) }
+function sqrt(x) { return Math.sqrt(x) }
+function acos(x) { return Math.acos(x) }
+function abs(x) { return Math.abs(x) }
+function sign(x) { return Math.sign(x) }
+function atan2(x,y) { return Math.atan2(x,y) }
+
 
 function jitter(line, amount) {
     return [
